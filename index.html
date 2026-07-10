@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<!--
+  WHILE WE WAIT - pocket games for kids in line
+  Single-file, offline-capable web app. No dependencies, no network calls.
+
+  ══════════════════════════════════════════════════════════════════
+  DEPLOYING TO A GIT REPO / GITHUB PAGES (for full PWA offline mode)
+  ══════════════════════════════════════════════════════════════════
+  This file works offline on its own once loaded. For a proper
+  installable PWA (Add to Home Screen + offline cache), drop these
+  two files next to index.html:
+
+  ── sw.js ─────────────────────────────────────────────────────────
+  const CACHE = 'wait-v1';
+  const ASSETS = ['./', './index.html', './manifest.webmanifest'];
+  self.addEventListener('install', e => {
+    e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting()));
+  });
+  self.addEventListener('activate', e => {
+    e.waitUntil(caches.keys().then(keys =>
+      Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
+    ).then(() => self.clients.claim()));
+  });
+  self.addEventListener('fetch', e => {
+    e.respondWith(caches.match(e.request).then(hit => hit || fetch(e.request)));
+  });
+  ──────────────────────────────────────────────────────────────────
+
+  ── manifest.webmanifest ──────────────────────────────────────────
+  {
+    "name": "While We Wait",
+    "short_name": "Wait Games",
+    "start_url": "./",
+    "display": "standalone",
+    "background_color": "#FFF8ED",
+    "theme_color": "#FFF8ED",
+    "icons": [
+      { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+      { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" }
+    ]
+  }
+  ──────────────────────────────────────────────────────────────────
+  (Any 192/512 PNG works for icons - a 🎴 emoji on a cream square is
+  on-brand. On iOS also add: <link rel="apple-touch-icon" href="icon-192.png">)
+
+  Bump CACHE to 'wait-v2' etc. whenever you edit this file.
+
+  ══════════════════════════════════════════════════════════════════
+  ADDING YOUR OWN GAMES
+  ══════════════════════════════════════════════════════════════════
+  Scroll to `const GAMES = [` below. Each game is one object; each
+  card is one object. Three card kinds:
+    kind:'std'    -> cards: { e:'emoji', k:'big kid line', p:'parent script' }
+    kind:'reveal' -> cards: { e:'emoji', name:'an elephant', clues:[c1,c2,c3] }
+    kind:'choice' -> cards: { a:['emoji','option A'], b:['emoji','option B'] }
+  Home screen counts update automatically.
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>While We Wait</title>
+<meta name="description" content="Pocket games for little kids stuck in line. Works offline.">
+<meta name="theme-color" content="#FFF8ED">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="While We Wait">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%23FFF8ED'/><text x='50' y='72' font-size='62' text-anchor='middle'>🎴</text></svg>">
+<style>
+  :root{
+    --paper:#FFF8ED;
+    --ink:#2B2440;
+    --ink-soft:#6B6386;
+    --card:#FFFFFF;
+    --line:#EFE6D6;
+    --shadow:0 10px 30px rgba(43,36,64,.12);
+    --radius:26px;
+    --calm:#4CC9F0;
+    --active:#FF6B6B;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%}
+  body{
+    font-family:ui-rounded,-apple-system,BlinkMacSystemFont,"SF Pro Rounded","Segoe UI",Roboto,sans-serif;
+    background:var(--paper);
+    color:var(--ink);
+    -webkit-font-smoothing:antialiased;
+    overscroll-behavior:none;
+    touch-action:manipulation;
+    user-select:none;
+    -webkit-user-select:none;
+  }
+  #app{
+    min-height:100dvh;
+    display:flex;flex-direction:column;
+    padding:calc(env(safe-area-inset-top) + 14px) 16px calc(env(safe-area-inset-bottom) + 14px);
+    max-width:520px;margin:0 auto;
+  }
+
+  /* ── Home ─────────────────────────────── */
+  .home-head{text-align:center;padding:10px 0 4px}
+  .home-head h1{font-size:34px;font-weight:900;letter-spacing:-.5px}
+  .home-head h1 .cards{display:inline-block;transform:rotate(-8deg);margin-right:6px}
+  .home-head p{color:var(--ink-soft);font-size:15px;font-weight:600;margin-top:4px}
+  .chips{display:flex;gap:8px;justify-content:center;margin:16px 0 14px}
+  .chip{
+    border:2px solid var(--line);background:var(--card);color:var(--ink-soft);
+    font:inherit;font-size:14px;font-weight:800;padding:9px 16px;border-radius:999px;
+    cursor:pointer;transition:transform .12s;
+  }
+  .chip:active{transform:scale(.94)}
+  .chip.on{background:var(--ink);border-color:var(--ink);color:#fff}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .tile{
+    position:relative;border:none;border-radius:var(--radius);cursor:pointer;
+    padding:18px 14px 14px;text-align:left;color:var(--ink);
+    background:var(--card);box-shadow:var(--shadow);
+    display:flex;flex-direction:column;gap:6px;min-height:132px;
+    transition:transform .12s;overflow:hidden;font-family:inherit;
+  }
+  .tile:active{transform:scale(.96)}
+  .tile::before{content:"";position:absolute;inset:0 0 auto 0;height:8px;background:var(--hue)}
+  .tile .te{font-size:40px;line-height:1;margin-top:2px}
+  .tile .tn{font-size:17px;font-weight:900;letter-spacing:-.2px}
+  .tile .tm{display:flex;align-items:center;gap:6px;margin-top:auto}
+  .badge{font-size:10.5px;font-weight:900;letter-spacing:.6px;padding:4px 8px;border-radius:999px;color:#fff}
+  .badge.calm{background:var(--calm)}
+  .badge.active{background:var(--active)}
+  .tcount{font-size:12px;font-weight:700;color:var(--ink-soft)}
+  .surprise{
+    margin-top:16px;border:none;border-radius:var(--radius);cursor:pointer;
+    padding:18px;font:inherit;font-size:18px;font-weight:900;color:#fff;
+    background:linear-gradient(120deg,#5271FF,#9B5DE5,#F15BB5);
+    box-shadow:var(--shadow);transition:transform .12s;
+  }
+  .surprise:active{transform:scale(.97)}
+  .home-foot{display:flex;flex-direction:column;align-items:center;gap:10px;margin-top:18px;padding-bottom:6px}
+  .wake{
+    border:2px solid var(--line);background:var(--card);color:var(--ink-soft);
+    font:inherit;font-size:13px;font-weight:800;padding:9px 16px;border-radius:999px;cursor:pointer;
+  }
+  .wake.on{border-color:#FFC93C;background:#FFF4D6;color:#8a6d00}
+  .credit{font-size:12px;color:var(--ink-soft);font-weight:600;opacity:.75}
+
+  /* ── Game screen ──────────────────────── */
+  .gbar{display:flex;align-items:center;gap:10px;padding:2px 0 10px}
+  .gbar .iconbtn{
+    width:46px;height:46px;border-radius:16px;border:2px solid var(--line);
+    background:var(--card);font-size:20px;cursor:pointer;flex:none;
+    display:flex;align-items:center;justify-content:center;color:var(--ink);
+    transition:transform .12s;font-family:inherit;font-weight:900;
+  }
+  .iconbtn:active{transform:scale(.92)}
+  .gtitle{flex:1;text-align:center;min-width:0}
+  .gtitle .gn{font-size:19px;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .gtitle .gc{font-size:12.5px;font-weight:700;color:var(--ink-soft)}
+
+  .stage{flex:1;display:flex;flex-direction:column;justify-content:center;min-height:0;padding:6px 0}
+  .deck{position:relative;margin:0 6px}
+  .deck::before,.deck::after{
+    content:"";position:absolute;inset:0;border-radius:var(--radius);
+    background:var(--card);box-shadow:var(--shadow);
+  }
+  .deck::before{transform:rotate(-2.6deg) translateY(7px)}
+  .deck::after{transform:rotate(1.8deg) translateY(4px)}
+  .cardface{
+    position:relative;z-index:2;background:var(--card);border-radius:var(--radius);
+    box-shadow:var(--shadow);overflow:hidden;display:flex;flex-direction:column;
+    min-height:min(54dvh,460px);border-top:10px solid var(--hue);
+  }
+  .cardface.deal{animation:deal .38s cubic-bezier(.2,1.4,.4,1)}
+  .cardface.dealback{animation:dealback .3s ease-out}
+  @keyframes deal{from{transform:translateX(70px) rotate(5deg);opacity:0}to{transform:none;opacity:1}}
+  @keyframes dealback{from{transform:translateX(-70px) rotate(-5deg);opacity:0}to{transform:none;opacity:1}}
+  .ckid{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:26px 20px;text-align:center}
+  .ce{font-size:clamp(64px,20dvh,112px);line-height:1;filter:drop-shadow(0 6px 12px rgba(43,36,64,.15))}
+  .ck{font-size:clamp(24px,6.4vw,32px);font-weight:900;letter-spacing:-.4px;line-height:1.2;max-width:22ch}
+  .cparent{
+    background:color-mix(in srgb,var(--hue) 12%,#fff);
+    border-top:2px dashed color-mix(in srgb,var(--hue) 40%,#fff);
+    padding:16px 20px calc(16px);font-size:15.5px;line-height:1.45;font-weight:600;color:var(--ink);
+  }
+  .cparent .plabel{display:block;font-size:11px;font-weight:900;letter-spacing:1px;color:color-mix(in srgb,var(--hue) 70%,var(--ink));margin-bottom:4px}
+  .cparent.trick{background:#FFE9EC;border-top-color:#FF6B6B}
+  .cparent.trick .plabel{color:#D63A52}
+
+  /* choice cards */
+  .choice{flex:1;display:flex;flex-direction:column;justify-content:center;gap:10px;padding:22px 20px}
+  .copt{display:flex;align-items:center;gap:16px;background:color-mix(in srgb,var(--hue) 9%,#fff);border:2px solid color-mix(in srgb,var(--hue) 30%,#fff);border-radius:20px;padding:14px 16px}
+  .copt .oe{font-size:52px;line-height:1}
+  .copt .ot{font-size:19px;font-weight:800;line-height:1.25}
+  .cor{text-align:center;font-size:15px;font-weight:900;color:var(--ink-soft);letter-spacing:2px}
+
+  /* reveal cards */
+  .clues{list-style:none;display:flex;flex-direction:column;gap:8px;margin-top:6px;text-align:left}
+  .clues li{display:flex;gap:10px;align-items:baseline;font-size:15.5px;font-weight:700;line-height:1.35}
+  .clues .n{flex:none;width:24px;height:24px;border-radius:50%;background:var(--hue);color:#fff;font-size:13px;font-weight:900;display:flex;align-items:center;justify-content:center;transform:translateY(3px)}
+  .revealbtn{
+    margin-top:16px;border:none;border-radius:999px;cursor:pointer;
+    padding:14px 26px;font:inherit;font-size:17px;font-weight:900;color:#fff;
+    background:var(--hue);box-shadow:var(--shadow);transition:transform .12s;
+  }
+  .revealbtn:active{transform:scale(.94)}
+  .revealname{font-size:clamp(22px,6vw,30px);font-weight:900}
+  .pop{animation:pop .4s cubic-bezier(.2,1.6,.4,1)}
+  @keyframes pop{from{transform:scale(.3);opacity:0}to{transform:scale(1);opacity:1}}
+
+  .ctrls{display:flex;gap:10px;padding-top:14px}
+  .prevbtn{
+    width:60px;flex:none;border:2px solid var(--line);background:var(--card);
+    border-radius:20px;font-size:22px;cursor:pointer;color:var(--ink-soft);
+    transition:transform .12s;font-family:inherit;
+  }
+  .prevbtn:disabled{opacity:.35}
+  .prevbtn:active:not(:disabled){transform:scale(.94)}
+  .nextbtn{
+    flex:1;border:none;border-radius:20px;cursor:pointer;padding:17px;
+    font:inherit;font-size:18px;font-weight:900;color:#fff;background:var(--ink);
+    box-shadow:var(--shadow);transition:transform .12s;
+  }
+  .nextbtn:active{transform:scale(.97)}
+
+  /* end of deck */
+  .done{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center;padding:30px 20px}
+  .done .de{font-size:90px}
+  .done h2{font-size:26px;font-weight:900}
+  .done p{color:var(--ink-soft);font-weight:700;font-size:15px}
+
+  /* rules overlay */
+  .overlay{
+    position:fixed;inset:0;z-index:50;background:rgba(43,36,64,.45);
+    display:flex;align-items:flex-end;justify-content:center;
+    animation:fadein .2s ease-out;backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);
+  }
+  @keyframes fadein{from{opacity:0}to{opacity:1}}
+  .sheet{
+    background:var(--card);width:100%;max-width:520px;
+    border-radius:28px 28px 0 0;padding:26px 24px calc(env(safe-area-inset-bottom) + 24px);
+    text-align:center;animation:rise .3s cubic-bezier(.2,1.2,.4,1);
+    border-top:10px solid var(--hue);
+  }
+  @keyframes rise{from{transform:translateY(60px);opacity:0}to{transform:none;opacity:1}}
+  .sheet .se{font-size:58px}
+  .sheet h2{font-size:24px;font-weight:900;margin:8px 0 2px}
+  .sheet .ssub{color:var(--ink-soft);font-weight:800;font-size:13.5px;letter-spacing:.4px;text-transform:uppercase}
+  .sheet .show{font-size:16px;line-height:1.5;font-weight:600;margin:14px 0 4px;text-align:left;color:var(--ink)}
+  .sheet .gobtn{
+    width:100%;margin-top:16px;border:none;border-radius:20px;cursor:pointer;padding:16px;
+    font:inherit;font-size:18px;font-weight:900;color:#fff;background:var(--hue);
+    transition:transform .12s;
+  }
+  .sheet .gobtn:active{transform:scale(.97)}
+
+  /* confetti */
+  .conf{position:fixed;z-index:99;pointer-events:none;font-size:22px;will-change:transform,opacity}
+
+  .hidden{display:none!important}
+  @media (prefers-reduced-motion:reduce){
+    *{animation:none!important;transition:none!important}
+  }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script src="games.js"></script>
+<script>
+'use strict';
+
+/* ════════════════ ENGINE ════════════════ */
+const app = document.getElementById('app');
+const state = {
+  filter:'all', gameId:null, order:[], pos:0, revealed:false,
+  seenRules:new Set(), wake:false, wakeLock:null,
+};
+
+const TOTAL_CARDS = GAMES.reduce((n,g)=>n+g.cards.length,0);
+
+function shuffle(n){
+  const a=[...Array(n).keys()];
+  for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}
+  return a;
+}
+const byId = id => GAMES.find(g=>g.id===id);
+
+/* ── Home ── */
+function renderHome(){
+  state.gameId=null;
+  const list = GAMES.filter(g=>state.filter==='all'||g.energy===state.filter);
+  app.innerHTML = `
+    <div class="home-head">
+      <h1><span class="cards">🎴</span>While We Wait</h1>
+      <p>${GAMES.length} pocket games \u00b7 ${TOTAL_CARDS} cards \u00b7 zero screens for them, one for you</p>
+    </div>
+    <div class="chips">
+      ${chip('all','All')}${chip('calm','🧘 Calm')}${chip('active','⚡ Active')}
+    </div>
+    <div class="grid">
+      ${list.map(g=>`
+        <button class="tile" style="--hue:${g.hue}" data-game="${g.id}">
+          <span class="te">${g.emoji}</span>
+          <span class="tn">${g.name}</span>
+          <span class="tm">
+            <span class="badge ${g.energy}">${g.energy==='calm'?'CALM':'ACTIVE'}</span>
+            <span class="tcount">${g.cards.length} cards</span>
+          </span>
+        </button>`).join('')}
+    </div>
+    <button class="surprise" id="surprise">🎲 Deal me a random game</button>
+    <div class="home-foot">
+      <button class="wake ${state.wake?'on':''}" id="wakebtn">${state.wake?'☕ Screen staying awake':'🌙 Keep screen awake'}</button>
+      <span class="credit">Works offline \u00b7 no internet needed once loaded</span>
+    </div>`;
+  app.querySelectorAll('.chip').forEach(c=>c.onclick=()=>{state.filter=c.dataset.f;renderHome();});
+  app.querySelectorAll('.tile').forEach(t=>t.onclick=()=>openGame(t.dataset.game));
+  document.getElementById('surprise').onclick=()=>{
+    const g=GAMES[Math.floor(Math.random()*GAMES.length)];
+    openGame(g.id);
+  };
+  document.getElementById('wakebtn').onclick=toggleWake;
+}
+function chip(f,label){
+  return `<button class="chip ${state.filter===f?'on':''}" data-f="${f}">${label}</button>`;
+}
+
+/* ── Game ── */
+function openGame(id){
+  const g=byId(id);
+  state.gameId=id;
+  state.order=shuffle(g.cards.length);
+  state.pos=0;
+  state.revealed=false;
+  const start=()=>renderGame(g);
+  if(!state.seenRules.has(id)){
+    state.seenRules.add(id);
+    renderGame(g);            // render behind the sheet
+    showRules(g);
+  } else start();
+}
+
+function renderGame(g){
+  app.style.setProperty('--hue',g.hue);
+  app.innerHTML = `
+    <div class="gbar">
+      <button class="iconbtn" id="backbtn" aria-label="Back">\u2039</button>
+      <div class="gtitle">
+        <div class="gn">${g.emoji} ${g.name}</div>
+        <div class="gc" id="counter"></div>
+      </div>
+      <button class="iconbtn" id="rulesbtn" aria-label="How to play">?</button>
+    </div>
+    <div class="stage" id="stage">
+      <div class="deck" style="--hue:${g.hue}">
+        <div class="cardface" id="cardface"></div>
+      </div>
+    </div>
+    <div class="ctrls">
+      <button class="prevbtn" id="prevbtn" aria-label="Previous card">\u21a9</button>
+      <button class="nextbtn" id="nextbtn">Next card \u2192</button>
+    </div>`;
+  document.getElementById('backbtn').onclick=renderHome;
+  document.getElementById('rulesbtn').onclick=()=>showRules(g);
+  document.getElementById('prevbtn').onclick=()=>nav(g,-1);
+  document.getElementById('nextbtn').onclick=()=>nav(g,1);
+  addSwipe(document.getElementById('stage'),g);
+  paintCard(g,'deal');
+}
+
+function nav(g,dir){
+  if(dir>0 && state.pos>=g.cards.length-1 && !isDone()){ renderDone(g); return; }
+  if(isDone() && dir>0){ // shuffle & restart
+    state.order=shuffle(g.cards.length); state.pos=0; state.revealed=false;
+    paintCard(g,'deal'); updateCtrls(g); return;
+  }
+  if(isDone() && dir<0){ // back out of the done screen to the last card
+    state.revealed=false; paintCard(g,'dealback'); return;
+  }
+  const np=state.pos+dir;
+  if(np<0||np>=g.cards.length) return;
+  state.pos=np; state.revealed=false;
+  paintCard(g,dir>0?'deal':'dealback');
+}
+let done=false;
+function isDone(){return done;}
+
+function paintCard(g,anim){
+  done=false;
+  const card=g.cards[state.order[state.pos]];
+  const face=freshFace(anim);
+  face.innerHTML=cardHTML(g,card);
+  if(g.kind==='reveal'&&!state.revealed){
+    const rb=face.querySelector('.revealbtn');
+    if(rb) rb.onclick=(ev)=>{
+      state.revealed=true;
+      const r=ev.target.getBoundingClientRect();
+      burst(r.left+r.width/2,r.top);
+      paintCard(g,null);
+    };
+  }
+  updateCtrls(g);
+}
+
+function freshFace(anim){
+  const old=document.getElementById('cardface');
+  const face=old.cloneNode(false);
+  face.className='cardface'+(anim?' '+anim:'');
+  old.replaceWith(face);
+  return face;
+}
+
+function cardHTML(g,card){
+  if(g.kind==='choice'){
+    return `
+      <div class="choice">
+        <div class="ck" style="font-size:20px;text-align:center;margin-bottom:4px">Would you rather\u2026</div>
+        <div class="copt"><span class="oe">${card.a[0]}</span><span class="ot">${card.a[1]}</span></div>
+        <div class="cor">\u2014 OR \u2014</div>
+        <div class="copt"><span class="oe">${card.b[0]}</span><span class="ot">${card.b[1]}</span></div>
+      </div>
+      <div class="cparent"><span class="plabel">FOR THE GROWN-UP</span>${card.p||g.pDefault}</div>`;
+  }
+  if(g.kind==='reveal'){
+    if(!state.revealed){
+      return `
+        <div class="ckid">
+          <div class="ce">\u2753</div>
+          <div class="ck">Who am I?</div>
+          <button class="revealbtn">\ud83c\udf89 Reveal the answer!</button>
+        </div>
+        <div class="cparent"><span class="plabel">READ THE CLUES \u2014 PAUSE FOR GUESSES</span>
+          <ol class="clues">${card.clues.map((c,i)=>`<li><span class="n">${i+1}</span><span>${c}</span></li>`).join('')}</ol>
+        </div>`;
+    }
+    return `
+      <div class="ckid">
+        <div class="ce pop">${card.e}</div>
+        <div class="ck revealname pop">I\u2019m ${card.name}</div>
+      </div>
+      <div class="cparent"><span class="plabel">FOR THE GROWN-UP</span>Nailed it? Victory dance. Way off? Even better story. Next mystery awaits \u2192</div>`;
+  }
+  // std
+  const trick=!!card.trick;
+  return `
+    <div class="ckid">
+      <div class="ce">${card.e}</div>
+      <div class="ck">${card.k}</div>
+    </div>
+    <div class="cparent ${trick?'trick':''}">
+      <span class="plabel">${trick?'\ud83d\udea8 TRICK CARD \u2014 KID CAN\u2019T READ THIS':'FOR THE GROWN-UP'}</span>${card.p}
+    </div>`;
+}
+
+function updateCtrls(g){
+  const c=document.getElementById('counter');
+  const nb=document.getElementById('nextbtn');
+  const pb=document.getElementById('prevbtn');
+  if(!c) return;
+  if(done){
+    c.textContent='Deck complete!';
+    nb.textContent='\ud83d\udd00 Shuffle & deal again';
+    pb.disabled=false;
+  } else {
+    c.textContent=`Card ${state.pos+1} of ${g.cards.length}`;
+    nb.textContent=(state.pos>=g.cards.length-1)?'Finish deck \ud83c\udf89':'Next card \u2192';
+    pb.disabled=state.pos===0;
+  }
+}
+
+function renderDone(g){
+  done=true;
+  const face=freshFace('deal');
+  face.innerHTML=`
+    <div class="done">
+      <div class="de">\ud83c\udf89</div>
+      <h2>Deck complete!</h2>
+      <p>You survived ${g.cards.length} cards of ${g.name}.<br>Is the line still going?! Shuffle up or grab another game.</p>
+    </div>`;
+  updateCtrls(g);
+  const r=face.getBoundingClientRect();
+  burst(r.left+r.width/2,r.top+r.height/3);
+}
+
+/* ── Rules sheet ── */
+function showRules(g){
+  const ov=document.createElement('div');
+  ov.className='overlay';
+  ov.innerHTML=`
+    <div class="sheet" style="--hue:${g.hue}">
+      <div class="se">${g.emoji}</div>
+      <h2>${g.name}</h2>
+      <div class="ssub">${g.energy==='calm'?'\ud83e\uddd8 calm game':'\u26a1 active game'} \u00b7 ${g.cards.length} cards</div>
+      <p class="show">${g.how}</p>
+      <button class="gobtn">Let\u2019s play \u2192</button>
+    </div>`;
+  const close=()=>ov.remove();
+  ov.querySelector('.gobtn').onclick=close;
+  ov.addEventListener('click',e=>{ if(e.target===ov) close(); });
+  document.body.appendChild(ov);
+}
+
+/* ── Swipe ── */
+function addSwipe(el,g){
+  let sx=0,sy=0;
+  el.addEventListener('touchstart',e=>{sx=e.touches[0].clientX;sy=e.touches[0].clientY;},{passive:true});
+  el.addEventListener('touchend',e=>{
+    const dx=e.changedTouches[0].clientX-sx, dy=e.changedTouches[0].clientY-sy;
+    if(Math.abs(dx)>48 && Math.abs(dy)<70) nav(g, dx<0?1:-1);
+  },{passive:true});
+}
+
+/* ── Confetti ── */
+const CONF=['\ud83c\udf89','\u2b50','\u2728','\ud83c\udf8a','\ud83d\udc9b','\ud83d\udc99','\ud83d\udc9c'];
+function burst(x,y){
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  for(let i=0;i<16;i++){
+    const s=document.createElement('span');
+    s.className='conf';
+    s.textContent=CONF[i%CONF.length];
+    s.style.left=x+'px'; s.style.top=y+'px';
+    document.body.appendChild(s);
+    const ang=Math.random()*Math.PI*2, d=60+Math.random()*110;
+    const tx=Math.cos(ang)*d, ty=Math.sin(ang)*d-90;
+    s.style.transition='transform 1.1s cubic-bezier(.15,.6,.4,1), opacity 1.1s ease-in';
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{
+      s.style.transform=`translate(${tx}px,${ty+190}px) rotate(${(Math.random()*2-1)*220}deg)`;
+      s.style.opacity='0';
+    }));
+    setTimeout(()=>s.remove(),1200);
+  }
+}
+
+/* ── Keep screen awake (Wake Lock API, fails gracefully) ── */
+async function toggleWake(){
+  if(state.wake){
+    try{ await state.wakeLock?.release(); }catch(e){}
+    state.wakeLock=null; state.wake=false;
+  } else {
+    try{
+      state.wakeLock=await navigator.wakeLock.request('screen');
+      state.wake=true;
+    }catch(e){ state.wake=false; }
+  }
+  const b=document.getElementById('wakebtn');
+  if(b){
+    b.classList.toggle('on',state.wake);
+    b.textContent=state.wake?'\u2615 Screen staying awake':'\ud83c\udf19 Keep screen awake';
+  }
+}
+document.addEventListener('visibilitychange',async()=>{
+  if(state.wake && document.visibilityState==='visible'){
+    try{ state.wakeLock=await navigator.wakeLock.request('screen'); }catch(e){}
+  }
+});
+
+/* ── Offline: register service worker when hosted (no-op as a local file) ── */
+try{
+  if('serviceWorker' in navigator && location.protocol.startsWith('http')){
+    addEventListener('load',()=>{
+      navigator.serviceWorker.register('sw.js').catch(()=>{});
+      navigator.serviceWorker.addEventListener('message', e => {
+        if(e.data && e.data.type === 'content-updated') showUpdateToast();
+      });
+    });
+  }
+}catch(e){}
+
+function showUpdateToast(){
+  if(document.getElementById('update-toast')) return;
+  const t = document.createElement('div');
+  t.id = 'update-toast';
+  t.innerHTML = `
+    <span>✨ New version available!</span>
+    <button onclick="location.reload()">Refresh</button>
+    <button onclick="this.parentElement.remove()" aria-label="Dismiss">✕</button>
+  `;
+  Object.assign(t.style, {
+    position:'fixed', bottom:'24px', left:'50%', transform:'translateX(-50%)',
+    background:'#2B2440', color:'#fff', padding:'12px 20px', borderRadius:'16px',
+    display:'flex', alignItems:'center', gap:'12px', zIndex:'9999',
+    boxShadow:'0 8px 30px rgba(0,0,0,.25)', fontSize:'15px', fontFamily:'system-ui,sans-serif',
+    animation:'toastIn .4s ease'
+  });
+  const style = document.createElement('style');
+  style.textContent = `
+    @keyframes toastIn { from { opacity:0; transform:translateX(-50%) translateY(20px); } to { opacity:1; transform:translateX(-50%) translateY(0); } }
+    #update-toast button { background:#4CC9F0; color:#2B2440; border:none; padding:6px 14px; border-radius:10px; font-weight:700; cursor:pointer; font-size:14px; }
+    #update-toast button:last-child { background:transparent; color:#fff; padding:6px 8px; }
+  `;
+  document.head.appendChild(style);
+  document.body.appendChild(t);
+}
+
+renderHome();
+</script>
+</body>
+</html>
