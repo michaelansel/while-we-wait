@@ -1,4 +1,4 @@
-const CACHE = 'wait-v6';
+const CACHE = 'wait-v7';
 const ASSETS = ['./', './index.html', './games.js', './manifest.webmanifest', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', e => {

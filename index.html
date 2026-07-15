@@ -370,7 +370,9 @@ function freshFace(anim){
 }
 
 function cardHTML(g,card){
-  if(g.kind==='choice'){
+  const plabel=g.plabel||'FOR THE GROWN-UP';
+  const kind=card.kind||g.kind;
+  if(kind==='choice'){
     return `
       <div class="choice">
         <div class="ck" style="font-size:20px;text-align:center;margin-bottom:4px">Would you rather\u2026</div>
@@ -378,7 +380,7 @@ function cardHTML(g,card){
         <div class="cor">\u2014 OR \u2014</div>
         <div class="copt"><span class="oe">${card.b[0]}</span><span class="ot">${card.b[1]}</span></div>
       </div>
-      <div class="cparent"><span class="plabel">FOR THE GROWN-UP</span>${card.p||g.pDefault}</div>`;
+      <div class="cparent"><span class="plabel">${plabel}</span>${card.p||g.pDefault}</div>`;
   }
   if(g.kind==='reveal'){
     if(!state.revealed){
@@ -407,7 +409,7 @@ function cardHTML(g,card){
       <div class="ck">${card.k}</div>
     </div>
     <div class="cparent ${trick?'trick':''}">
-      <span class="plabel">${trick?'\ud83d\udea8 TRICK CARD \u2014 KID CAN\u2019T READ THIS':'FOR THE GROWN-UP'}</span>${card.p}
+      <span class="plabel">${trick?'\ud83d\udea8 TRICK CARD \u2014 KID CAN\u2019T READ THIS':plabel}</span>${card.p}
     </div>`;
 }
 
