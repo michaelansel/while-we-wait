@@ -1,6 +1,6 @@
 # While We Wait
 
-Pocket games for little kids stuck in line. Offline-capable PWA, no dependencies, no build step.
+Pocket games for people stuck waiting somewhere — originally built for little kids in line, now also includes a couples' conversation-starter game (Date Night) for date nights waiting on food, etc. Offline-capable PWA, no dependencies, no build step.
 
 **Live:** https://whale-cobra.exe.xyz/while-we-wait/
 
@@ -13,6 +13,7 @@ Pocket games for little kids stuck in line. Offline-capable PWA, no dependencies
 | `sw.js` | Service worker for offline support + background update detection |
 | `manifest.webmanifest` | PWA manifest (name, icons, theme) |
 | `icon-192.png`, `icon-512.png` | PWA icons (🎴 on cream background) |
+| `plans/` | Optional scratch notes/content plans from subagents (e.g. content design docs) — not required for the app to run |
 
 ## Architecture
 
@@ -31,11 +32,17 @@ Each game is one object in the `GAMES` array. Required fields:
   emoji: '🎯',               // home screen icon
   energy: 'calm' | 'active', // filter category
   hue: '#HEX',              // accent color for the game
-  kind: 'std' | 'reveal' | 'choice',  // determines card layout
+  kind: 'std' | 'reveal' | 'choice',  // determines default card layout
   how: 'Instructions...',   // shown in rules sheet
-  cards: [...]              // array of card objects (format depends on kind)
+  cards: [...],             // array of card objects (format depends on kind)
+
+  // Optional:
+  plabel: 'FOR THE GROWN-UP', // overrides the helper-line label (e.g. 'FOR YOU TWO' for Date Night)
+  pDefault: 'Fallback helper text used when a card has no own `p`',
 }
 ```
+
+A game's `kind` sets the *default* layout for its cards, but an individual card can override it with its own `kind` field (e.g. sprinkling `{ kind:'choice', a:[...], b:[...] }` cards into an otherwise `std` deck — see Date Night, which mixes prompt cards and Would-You-Rather cards in one shuffled deck).
 
 ### Card Formats by Kind
 
@@ -54,6 +61,7 @@ Optional: `trick: true` (used by Simon Says for trick rounds)
 ```js
 { a: ['🐒', 'option A text'], b: ['🪶', 'option B text'] }
 ```
+If a card has no own `p`, the game's `pDefault` (if set) is shown as the helper line.
 
 Home screen card counts update automatically from the data.
 
