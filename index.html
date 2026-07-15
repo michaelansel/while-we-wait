@@ -1,59 +1,18 @@
 <!DOCTYPE html>
 <!--
   WHILE WE WAIT - pocket games for kids in line
-  Single-file, offline-capable web app. No dependencies, no network calls.
+  Offline-capable PWA. No dependencies, no build step.
 
-  ══════════════════════════════════════════════════════════════════
-  DEPLOYING TO A GIT REPO / GITHUB PAGES (for full PWA offline mode)
-  ══════════════════════════════════════════════════════════════════
-  This file works offline on its own once loaded. For a proper
-  installable PWA (Add to Home Screen + offline cache), drop these
-  two files next to index.html:
+  See AGENTS.md for full documentation.
 
-  ── sw.js ─────────────────────────────────────────────────────────
-  const CACHE = 'wait-v1';
-  const ASSETS = ['./', './index.html', './manifest.webmanifest'];
-  self.addEventListener('install', e => {
-    e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting()));
-  });
-  self.addEventListener('activate', e => {
-    e.waitUntil(caches.keys().then(keys =>
-      Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
-    ).then(() => self.clients.claim()));
-  });
-  self.addEventListener('fetch', e => {
-    e.respondWith(caches.match(e.request).then(hit => hit || fetch(e.request)));
-  });
-  ──────────────────────────────────────────────────────────────────
+  Files:
+    index.html           - App shell (HTML + CSS + engine JS)
+    games.js             - All game data (edit this to add/change games)
+    sw.js                - Service worker (offline + update toast)
+    manifest.webmanifest - PWA manifest
+    icon-192/512.png     - PWA icons
 
-  ── manifest.webmanifest ──────────────────────────────────────────
-  {
-    "name": "While We Wait",
-    "short_name": "Wait Games",
-    "start_url": "./",
-    "display": "standalone",
-    "background_color": "#FFF8ED",
-    "theme_color": "#FFF8ED",
-    "icons": [
-      { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
-      { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" }
-    ]
-  }
-  ──────────────────────────────────────────────────────────────────
-  (Any 192/512 PNG works for icons - a 🎴 emoji on a cream square is
-  on-brand. On iOS also add: <link rel="apple-touch-icon" href="icon-192.png">)
-
-  Bump CACHE to 'wait-v2' etc. whenever you edit this file.
-
-  ══════════════════════════════════════════════════════════════════
-  ADDING YOUR OWN GAMES
-  ══════════════════════════════════════════════════════════════════
-  Scroll to `const GAMES = [` below. Each game is one object; each
-  card is one object. Three card kinds:
-    kind:'std'    -> cards: { e:'emoji', k:'big kid line', p:'parent script' }
-    kind:'reveal' -> cards: { e:'emoji', name:'an elephant', clues:[c1,c2,c3] }
-    kind:'choice' -> cards: { a:['emoji','option A'], b:['emoji','option B'] }
-  Home screen counts update automatically.
+  To add games: edit games.js. See AGENTS.md for the data format.
 -->
 <html lang="en">
 <head>
