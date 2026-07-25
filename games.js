@@ -513,6 +513,14 @@ const GAMES = [
     {kind:'choice', a:['🐶','Adopt an extremely dumb, extremely loving dog'], b:['🐈','Adopt a brilliant cat that judges us both']},
     {e:'📅', k:'What\u2019s one tiny tradition we should start?', p:'Weekly, monthly, or \u2018every time it rains.\u2019 Pick one and actually start it.'},
     {e:'🚀', k:'What\u2019s on your bucket list that I might not know about?', p:'Follow-up: which one could we knock out together first?'},
+    {e:'🎞️', k:'If this stretch of our life had an episode title, what would it be?', p:'Name the one before it too \u2014 then guess what the next one\u2019s called.'},
+    {e:'🎟️', k:'What\u2019s the next thing on your calendar you\u2019re actually looking forward to?', p:'From memory only \u2014 no checking. If the honest answer is \u201cnothing,\u201d we fix that before the check comes.'},
+    {e:'🐇', k:'What have you been low-key obsessed with lately?', p:'Follow-up: how long do we give this one? Place your bets.'},
+    {kind:'choice', a:['⏰','Always run ten minutes late, together'], b:['⏳','Always arrive thirty minutes early, together']},
+    {e:'🪁', k:'What\u2019s something that used to stress you out that just\u2026 doesn\u2019t anymore?', p:'Follow-up: what changed \u2014 you, or the thing?'},
+    {e:'🤲', k:'What\u2019s one small thing I could do for you this week that would actually help?', p:'Small and specific \u2014 \u201cbe more thoughtful\u201d doesn\u2019t count. Name something with a verb in it.'},
+    {e:'🎙️', k:'What\u2019s something you wish someone would ask you about right now?', p:'Then ask it. Obviously.'},
+    {kind:'choice', a:['🧍','Ten minutes a day where time stops and you\u2019re alone'], b:['👫','Ten minutes a day where time stops and we\u2019re together']},
   ]},
 
 ];
