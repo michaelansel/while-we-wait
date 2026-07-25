@@ -72,9 +72,11 @@ Home screen card counts update automatically from the data.
 2. Fetches fresh copies in background when online
 3. If content changed, sends `content-updated` message to the page
 4. Page shows a toast: "✨ New version available!" with Refresh/Dismiss
-5. Cache version string in `sw.js` (`CACHE = 'wait-vN'`) should be bumped when changing the asset list
+5. Cache version string in `sw.js` (`CACHE = 'wait-vN'`) should be bumped when changing the SW itself or the asset list
 
 The `ASSETS` array in `sw.js` must list every file the app needs offline.
+
+**Content-only changes (e.g. new cards in `games.js`) do NOT require a cache bump.** The SW's fetch handler detects changed headers via `hasChanged()` and fires the update toast automatically. Bump `CACHE` only when you change `sw.js` itself or need to force a clean cache.
 
 ### PWA
 
@@ -93,3 +95,21 @@ Edit `index.html`. The engine code starts at the `/* ENGINE */` comment.
 
 ### After any change
 If you added a new file that needs to work offline, add it to the `ASSETS` array in `sw.js` and bump the `CACHE` version.
+
+## Deploying
+
+### Automated deploy (no AI needed)
+
+```bash
+deploy-while-we-wait.sh              # pull & deploy
+deploy-while-we-wait.sh --dry-run    # preview what's incoming, change nothing
+deploy-while-we-wait.sh --rollback   # undo the last deploy
+```
+
+The script lives at `/home/exedev/bin/deploy-while-we-wait.sh` (outside the web root). It's **read-only** with respect to the remote — it never commits or pushes, only fast-forwards. It acquires a lock (no concurrent deploys), checks for a clean working tree, fetches, shows incoming commits, fast-forwards, and smoke-tests the live site (index + games.js + .git-not-served).
+
+No fileserver restart is needed — busybox httpd reads from disk per request.
+
+### What the deploy script does NOT do
+- **No cache bumping.** Content-only changes (new cards in `games.js`) are picked up by the SW's stale-while-revalidate handler automatically. Bumping `CACHE` is a developer concern, done in `sw.js` when the SW itself changes.
+- **No commit or push.** The deploy host is read-only with respect to the git remote. This avoids push races, credential requirements, and history churn.
