@@ -5,7 +5,7 @@
    exactly as games.js defined it. See AGENTS.md for the merge contract. */
 (function () {
   const STORAGE_KEY = 'wwFamilyPass';
-  const ENDPOINT = '/family/games.js';
+  const ENDPOINT = '/while-we-wait-family/games.js';
   const USER = 'familyuser';
   let merged = false;
 

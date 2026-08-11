@@ -127,17 +127,17 @@ touches this repo's git history, even behind a password. Design writeup:
 - The private content is a separate repo, **michaelansel/while-we-wait-private**
   (private, on GitHub), with the exact same `games.js` card-object format as
   this repo but exporting `const PRIVATE_GAMES = [...]` instead of `GAMES`.
-- It deploys to `/home/exedev/www/family` on whale-cobra — a sibling
+- It deploys to `/home/exedev/www/while-we-wait-family` on whale-cobra — a sibling
   directory to this app's work tree, **not** nested inside it — via its own
   copy of the deploy script: `deploy-while-we-wait-private.sh`. Same
   lock/fast-forward-only/smoke-test pattern as `deploy-while-we-wait.sh`.
-- `/family/` is gated by BusyBox httpd's built-in per-path Basic Auth
+- `/while-we-wait-family/` is gated by BusyBox httpd's built-in per-path Basic Auth
   (`/home/exedev/httpd.conf`, wired into `fileserver.service` via `-c`). No
   new server process, no OAuth, no session store. One shared passphrase for
   the whole family (not per-person).
 - Client-side, `family.js` (loaded after `games.js`, before the engine):
   - On load, silently checks `localStorage` for a saved passphrase. If
-    present, fetches `/family/games.js` with a manually-attached
+    present, fetches `/while-we-wait-family/games.js` with a manually-attached
     `Authorization: Basic` header and merges `PRIVATE_GAMES` into the
     page's `GAMES` array, then the engine re-renders the home screen.
   - Exposes a "🔒 Unlock family games" button (home screen footer) that
@@ -147,7 +147,7 @@ touches this repo's git history, even behind a password. Design writeup:
     content) — the public app is always the correct fallback, never an
     error state. The manual "unlock" button *does* show an alert on
     failure (wrong passphrase feedback), since that path is user-initiated.
-  - `/family/` is intentionally outside the service worker's `/while-we-wait/`
+  - `/while-we-wait-family/` is intentionally outside the service worker's `/while-we-wait/`
     scope, so the SW's cache-first logic never sees (or caches) an
     authenticated fetch or a 401. Private content is **not** offline-capable
     in v1 — every unlock re-fetches over the network.
@@ -159,6 +159,23 @@ touches this repo's git history, even behind a password. Design writeup:
    to `main`.
 2. On whale-cobra: `deploy-while-we-wait-private.sh` (or `--dry-run` first).
 3. No changes needed here unless the merge contract itself changes.
+
+### Server config is now tracked in git
+
+`/etc/systemd/system/fileserver.service` and `/home/exedev/httpd.conf`
+(the Basic Auth config) live in a separate repo on the box,
+`/home/exedev/whale-cobra-config`, not this one — it's host infrastructure,
+not app content. See its `VM_LAYOUT.md` for the full picture. Load-bearing
+detail: **BusyBox httpd's per-path Basic Auth is not default-deny** — a
+protected path with no matching (or a dropped/malformed) `httpd.conf` line
+is served with zero auth and no error. Confirmed empirically 2026-08-11.
+`whale-cobra-config` includes `enforce-server-config.sh`, run every 3
+minutes via a systemd timer, which restores the live config from git if
+it's drifted and independently probes the protected path unauthenticated —
+if auth still isn't enforced after restoring config, it stops the
+fileserver rather than leave anything silently public. Don't hand-edit
+`httpd.conf` or the unit file directly on the box; edit the tracked copy
+and re-run the enforcement script, or the next timer tick reverts it.
 
 ### Constraints worth knowing
 
