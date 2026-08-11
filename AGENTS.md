@@ -9,7 +9,8 @@ Pocket games for people stuck waiting somewhere — originally built for little 
 | File | Purpose |
 |------|---------|
 | `index.html` | App shell: HTML, CSS, and game engine JS |
-| `games.js` | **All game data** — the only file you need to edit to add/change games |
+| `games.js` | **All public game data** — the only file you need to edit to add/change games |
+| `family.js` | Private/family content tier — fetches and merges non-public games. See "Private/Family Content Tier" below |
 | `sw.js` | Service worker for offline support + background update detection |
 | `manifest.webmanifest` | PWA manifest (name, icons, theme) |
 | `icon-192.png`, `icon-512.png` | PWA icons (🎴 on cream background) |
@@ -113,3 +114,60 @@ No fileserver restart is needed — busybox httpd reads from disk per request.
 ### What the deploy script does NOT do
 - **No cache bumping.** Content-only changes (new cards in `games.js`) are picked up by the SW's stale-while-revalidate handler automatically. Bumping `CACHE` is a developer concern, done in `sw.js` when the SW itself changes.
 - **No commit or push.** The deploy host is read-only with respect to the git remote. This avoids push races, credential requirements, and history churn.
+
+## Private/Family Content Tier
+
+Non-public content (paid/licensed material that shouldn't be redistributed,
+or personal/family stuff) lives **outside this repo entirely** — it never
+touches this repo's git history, even behind a password. Design writeup:
+`PLANS/WHILE_WE_WAIT_PRIVATE_CONTENT.md` in the workspace this was built from.
+
+### How it works
+
+- The private content is a separate repo, **michaelansel/while-we-wait-private**
+  (private, on GitHub), with the exact same `games.js` card-object format as
+  this repo but exporting `const PRIVATE_GAMES = [...]` instead of `GAMES`.
+- It deploys to `/home/exedev/www/family` on whale-cobra — a sibling
+  directory to this app's work tree, **not** nested inside it — via its own
+  copy of the deploy script: `deploy-while-we-wait-private.sh`. Same
+  lock/fast-forward-only/smoke-test pattern as `deploy-while-we-wait.sh`.
+- `/family/` is gated by BusyBox httpd's built-in per-path Basic Auth
+  (`/home/exedev/httpd.conf`, wired into `fileserver.service` via `-c`). No
+  new server process, no OAuth, no session store. One shared passphrase for
+  the whole family (not per-person).
+- Client-side, `family.js` (loaded after `games.js`, before the engine):
+  - On load, silently checks `localStorage` for a saved passphrase. If
+    present, fetches `/family/games.js` with a manually-attached
+    `Authorization: Basic` header and merges `PRIVATE_GAMES` into the
+    page's `GAMES` array, then the engine re-renders the home screen.
+  - Exposes a "🔒 Unlock family games" button (home screen footer) that
+    prompts for the passphrase once, and only saves it to `localStorage`
+    on a successful fetch.
+  - **Fails silently** on the auto-unlock path (401, offline, malformed
+    content) — the public app is always the correct fallback, never an
+    error state. The manual "unlock" button *does* show an alert on
+    failure (wrong passphrase feedback), since that path is user-initiated.
+  - `/family/` is intentionally outside the service worker's `/while-we-wait/`
+    scope, so the SW's cache-first logic never sees (or caches) an
+    authenticated fetch or a 401. Private content is **not** offline-capable
+    in v1 — every unlock re-fetches over the network.
+
+### Adding real private content
+
+1. Clone `michaelansel/while-we-wait-private`, edit `games.js` there (same
+   card format as this repo — see "Game Data Format" above), commit, push
+   to `main`.
+2. On whale-cobra: `deploy-while-we-wait-private.sh` (or `--dry-run` first).
+3. No changes needed here unless the merge contract itself changes.
+
+### Constraints worth knowing
+
+- The private repo has no `exe.dev` git integration set up automatically —
+  it was provisioned once via the exe.dev dashboard (by the human operator)
+  the same way this repo's is. If a *second* private tier is ever needed,
+  that dashboard step has to happen again; it's not scriptable from here.
+- The shared family passphrase is distributed manually (verbally / a note)
+  — there's no invite-link system. Changing it means updating
+  `/home/exedev/httpd.conf` on the box (`busybox httpd -m <newpass>` for the
+  hash) and telling family the new one; existing `localStorage` entries on
+  their devices will then silently fail the auto-unlock until they re-enter it.

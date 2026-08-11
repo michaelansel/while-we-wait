@@ -225,6 +225,7 @@
 <body>
 <div id="app"></div>
 <script src="games.js"></script>
+<script src="family.js"></script>
 <script>
 'use strict';
 
@@ -232,10 +233,8 @@
 const app = document.getElementById('app');
 const state = {
   filter:'all', gameId:null, order:[], pos:0, revealed:false,
-  seenRules:new Set(), wake:false, wakeLock:null,
+  seenRules:new Set(), wake:false, wakeLock:null, familyUnlocked:false,
 };
-
-const TOTAL_CARDS = GAMES.reduce((n,g)=>n+g.cards.length,0);
 
 function shuffle(n){
   const a=[...Array(n).keys()];
@@ -248,10 +247,11 @@ const byId = id => GAMES.find(g=>g.id===id);
 function renderHome(){
   state.gameId=null;
   const list = GAMES.filter(g=>state.filter==='all'||g.energy===state.filter);
+  const totalCards = GAMES.reduce((n,g)=>n+g.cards.length,0);
   app.innerHTML = `
     <div class="home-head">
       <h1><span class="cards">🎴</span>While We Wait</h1>
-      <p>${GAMES.length} pocket games \u00b7 ${TOTAL_CARDS} cards \u00b7 zero screens for them, one for you</p>
+      <p>${GAMES.length} pocket games \u00b7 ${totalCards} cards \u00b7 zero screens for them, one for you</p>
     </div>
     <div class="chips">
       ${chip('all','All')}${chip('calm','🧘 Calm')}${chip('active','⚡ Active')}
@@ -270,6 +270,7 @@ function renderHome(){
     <button class="surprise" id="surprise">🎲 Deal me a random game</button>
     <div class="home-foot">
       <button class="wake ${state.wake?'on':''}" id="wakebtn">${state.wake?'☕ Screen staying awake':'🌙 Keep screen awake'}</button>
+      <button class="wake ${state.familyUnlocked?'on':''}" id="familybtn">${state.familyUnlocked?'🔓 Family games unlocked':'🔒 Unlock family games'}</button>
       <span class="credit">Works offline \u00b7 no internet needed once loaded</span>
     </div>`;
   app.querySelectorAll('.chip').forEach(c=>c.onclick=()=>{state.filter=c.dataset.f;renderHome();});
@@ -279,6 +280,15 @@ function renderHome(){
     openGame(g.id);
   };
   document.getElementById('wakebtn').onclick=toggleWake;
+  document.getElementById('familybtn').onclick=handleFamilyBtn;
+}
+async function handleFamilyBtn(){
+  if(state.familyUnlocked){
+    if(confirm('Forget the family passphrase on this device?')) familyLock();
+    return;
+  }
+  const ok=await familyUnlockPrompt();
+  if(ok){ state.familyUnlocked=true; renderHome(); }
 }
 function chip(f,label){
   return `<button class="chip ${state.filter===f?'on':''}" data-f="${f}">${label}</button>`;
@@ -554,6 +564,14 @@ function showUpdateToast(){
 }
 
 renderHome();
+
+/* ── Family/private content: silent upgrade if a passphrase is already saved ── */
+familyAutoUnlock().then(ok=>{
+  if(ok){
+    state.familyUnlocked=true;
+    if(!state.gameId) renderHome(); // only re-paint if still on the home screen
+  }
+});
 </script>
 </body>
 </html>
