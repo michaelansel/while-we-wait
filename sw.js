@@ -1,4 +1,4 @@
-const CACHE = 'wait-v8';
+const CACHE = 'wait-v10';
 const ASSETS = ['./', './index.html', './games.js', './family.js', './manifest.webmanifest', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', e => {
@@ -17,12 +17,10 @@ self.addEventListener('activate', e => {
   );
 });
 
-// Track whether we've already notified this session
-let notified = false;
-
+// Notify on every detected change — the page's toast is idempotent
+// (single #update-toast element), so repeats are harmless. The old
+// once-per-SW-session flag silently swallowed later updates.
 function notifyClients() {
-  if (notified) return;
-  notified = true;
   self.clients.matchAll({ type: 'window' }).then(clients => {
     clients.forEach(c => c.postMessage({ type: 'content-updated' }));
   });
@@ -42,7 +40,14 @@ self.addEventListener('fetch', e => {
   e.respondWith(
     caches.open(CACHE).then(cache =>
       cache.match(e.request).then(cached => {
-        const fetchPromise = fetch(e.request).then(response => {
+        // cache:'no-store' — the browser's HTTP cache can otherwise serve a
+        // stale copy here, making hasChanged() see identical headers and
+        // silently miss real updates.
+        // Update-probe fetches from the manual "Check for updates" button
+        // (?ck= param) must not be served from or written into the cache.
+        const isProbe = new URL(e.request.url).searchParams.has('ck');
+        if (isProbe) return fetch(e.request, {cache:'no-store'});
+        const fetchPromise = fetch(e.request, {cache:'no-store'}).then(response => {
           if (response.ok) {
             if (hasChanged(cached, response)) notifyClients();
             cache.put(e.request, response.clone());

@@ -271,6 +271,7 @@ function renderHome(){
     <div class="home-foot">
       <button class="wake ${state.wake?'on':''}" id="wakebtn">${state.wake?'☕ Screen staying awake':'🌙 Keep screen awake'}</button>
       <button class="wake ${state.familyUnlocked?'on':''}" id="familybtn">${state.familyUnlocked?'🔓 Family games unlocked':'🔒 Unlock family games'}</button>
+      <button class="wake" id="updatebtn">🔄 Check for updates</button>
       <span class="credit">Works offline \u00b7 no internet needed once loaded</span>
     </div>`;
   app.querySelectorAll('.chip').forEach(c=>c.onclick=()=>{state.filter=c.dataset.f;renderHome();});
@@ -281,6 +282,7 @@ function renderHome(){
   };
   document.getElementById('wakebtn').onclick=toggleWake;
   document.getElementById('familybtn').onclick=handleFamilyBtn;
+  document.getElementById('updatebtn').onclick=e=>checkForUpdates(e.currentTarget);
 }
 async function handleFamilyBtn(){
   if(state.familyUnlocked){
@@ -289,6 +291,48 @@ async function handleFamilyBtn(){
   }
   const ok=await familyUnlockPrompt();
   if(ok){ state.familyUnlocked=true; renderHome(); }
+}
+/* Manual update check: the SW's auto-detection only fires when its fetch
+   handler sees requests (and relies on header comparison), which can miss.
+   This force-fetches the core files and compares their content against the
+   cached copy — independent of headers. The no-store fetch also passes
+   through the SW, refreshing its cache so a reload picks everything up. */
+async function checkForUpdates(btn){
+  if(btn.dataset.checking) return;
+  btn.dataset.checking='1';
+  const orig=btn.textContent;
+  btn.disabled=true; btn.textContent='🔄 Checking…';
+  const files=['index.html','games.js','family.js','sw.js'];
+  const base=new URL('.',location.href).href;
+  let changed=false, offline=false;
+  const chkId=Date.now();
+  await Promise.all(files.map(async f=>{
+    try{
+      // Compare "what the page is running" vs "what the server has".
+      // Plain fetch → SW serves its cached copy (what this page loaded).
+      // Cache-busting query param → SW's cache.match() misses → true
+      // network copy. The ?ck fetch is skipped by the SW cache (see sw.js).
+      const [runRes,freshRes]=await Promise.all([
+        fetch(new URL(f,base).href).catch(()=>null),
+        fetch(new URL(f+'?ck='+chkId,base).href,{cache:'no-store'}).catch(()=>null)
+      ]);
+      if(!freshRes||!freshRes.ok){ offline=true; return; }
+      if(!runRes||!runRes.ok){ changed=true; return; }
+      const [runText,freshText]=await Promise.all([runRes.text(),freshRes.text()]);
+      if(runText!==freshText) changed=true;
+    }catch(e){ offline=true; }
+  }));
+  delete btn.dataset.checking;
+  btn.disabled=false;
+  if(changed){
+    btn.textContent='✨ Update found!';
+    showUpdateToast();
+  }else if(offline){
+    btn.textContent='📡 Offline — can\u2019t check';
+  }else{
+    btn.textContent='✓ Up to date';
+  }
+  setTimeout(()=>{ btn.textContent=orig; },3000);
 }
 function chip(f,label){
   return `<button class="chip ${state.filter===f?'on':''}" data-f="${f}">${label}</button>`;
