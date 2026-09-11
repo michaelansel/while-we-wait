@@ -1,4 +1,4 @@
-const CACHE = 'wait-v10';
+const CACHE = 'wait-v11';
 const ASSETS = ['./', './index.html', './games.js', './family.js', './manifest.webmanifest', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', e => {
@@ -37,6 +37,26 @@ function hasChanged(cached, fresh) {
 }
 
 self.addEventListener('fetch', e => {
+  // Navigations: NETWORK-FIRST. The old always-cached-first behavior could get
+  // permanently stuck: revalidation went through the browser HTTP cache (no
+  // Cache-Control headers from the server), a stale copy compared "unchanged"
+  // and got written back into this cache — poisoning it. A page reload then
+  // served the stale copy forever. Online navigations now always hit the
+  // network; the cache is only the offline fallback.
+  if (e.request.mode === 'navigate') {
+    e.respondWith(
+      fetch(e.request, {cache:'no-store'})
+        .then(response => {
+          if (response.ok) {
+            const copy = response.clone();
+            caches.open(CACHE).then(c => c.put(e.request, copy));
+          }
+          return response;
+        })
+        .catch(() => caches.open(CACHE).then(c => c.match(e.request)))
+    );
+    return;
+  }
   e.respondWith(
     caches.open(CACHE).then(cache =>
       cache.match(e.request).then(cached => {
