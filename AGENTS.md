@@ -11,6 +11,7 @@ Pocket games for people stuck waiting somewhere — originally built for little 
 | `index.html` | App shell: HTML, CSS, and game engine JS |
 | `games.js` | **All public game data** — the only file you need to edit to add/change games |
 | `charades-art.js` | **Generated** OpenMoji SVGs for cards with an `art:` field. Rebuild with `node tools/build-charades-art.mjs` — never edit by hand |
+| `tools/contact-sheet.html` | Dev-time page showing every card's picture next to its words, for the card art rule below |
 | `tools/build-charades-art.mjs` | Dev-time script: fetches the OpenMoji SVGs referenced in `games.js`, minifies them, writes `charades-art.js` |
 | `family.js` | Private/family content tier — fetches and merges non-public games. See "Private/Family Content Tier" below |
 | `sw.js` | Service worker for offline support + background update detection |
@@ -95,6 +96,14 @@ The `ASSETS` array in `sw.js` must list every file the app needs offline.
 
 ### Adding/editing games
 Edit `games.js` only. Follow the format above. The engine picks up changes on reload.
+
+### Card art rule: the picture must depict the card's words
+Every card's emoji (`e`, `a[0]`/`b[0]`) or OpenMoji `art` must show what the card actually says. Kids who can't read act from the picture alone.
+- **No category badges.** A paw print on "Ostrich" or a medal on "Synchronized swimming" is wrong. If no icon fits, rename the card so one does (e.g. "Stomp like a GIANT" 🦣 became "Stomp like a MAMMOTH"). On text-led decks like Word Charades, you can instead omit the picture: a card with neither `art` nor `e` renders words only.
+- For open prompts ("Find something SPIKY"), a clear example is fine (🌵).
+- **Look at it, don't trust the name.** Some icons don't read as what they're called. OpenMoji's roller coaster `1F3A2` looks like a stock chart, its elevator `E204` is unreadable and its full moon `1F315` is a plain yellow disc. Apple's 🪙 coin is silver.
+- **Check by eye before committing.** Serve the repo root (`python3 -m http.server 8777`) and open `http://localhost:8777/tools/contact-sheet.html?game=<id>` to see each picture next to its words. Look at every card you added or changed.
+- Testing gotcha: a reused browser profile serves the *previous* build from the service worker (you'll see the "New version available" toast). Use a fresh profile or private window.
 
 ### Changing app UI/behavior
 Edit `index.html`. The engine code starts at the `/* ENGINE */` comment.
