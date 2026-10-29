@@ -42,7 +42,7 @@ Each game is one object in the `GAMES` array. Required fields:
   // Optional:
   plabel: 'FOR THE GROWN-UP', // overrides the helper-line label (e.g. 'FOR YOU TWO' for Date Night)
   pDefault: 'Fallback helper text used when a card has no own `p`',
-  artSize: 'small',           // render `art` as a small badge so the words are the card (Word Charades)
+  artSize: 'small',           // render `art` smaller so the words lead (Word Charades). Cards without a matching icon just omit `art` and `e`
 }
 ```
 

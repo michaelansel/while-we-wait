@@ -138,8 +138,8 @@
   .ckid{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:26px 20px;text-align:center}
   .ce{font-size:clamp(64px,20dvh,112px);line-height:1;filter:drop-shadow(0 6px 12px rgba(43,36,64,.15))}
   .ce.art svg{display:block;height:clamp(110px,28dvh,210px);width:auto;max-width:70vw;margin:0 auto}
-  /* artSize:'small' games: the words are the card, the art is just a category badge */
-  .ckid.smallart .ce.art svg{height:clamp(56px,11dvh,84px)}
+  /* artSize:'small' games: the words are the card, the art is a supporting hint */
+  .ckid.smallart .ce.art svg{height:clamp(72px,15dvh,120px)}
   .ckid.smallart .ck{font-size:clamp(28px,8.4vw,40px);max-width:16ch}
   .ck{font-size:clamp(24px,6.4vw,32px);font-weight:900;letter-spacing:-.4px;line-height:1.2;max-width:22ch}
   .cparent{
@@ -466,7 +466,7 @@ function cardHTML(g,card){
   const art=card.art&&typeof ART!=='undefined'&&ART[card.art];
   return `
     <div class="ckid${g.artSize==='small'?' smallart':''}">
-      ${art?`<div class="ce art">${art}</div>`:`<div class="ce">${card.e}</div>`}
+      ${art?`<div class="ce art">${art}</div>`:card.e?`<div class="ce">${card.e}</div>`:''}
       <div class="ck">${card.k}</div>
     </div>
     <div class="cparent ${trick?'trick':''}">
