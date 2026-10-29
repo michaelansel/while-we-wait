@@ -8,6 +8,7 @@
   Files:
     index.html           - App shell (HTML + CSS + engine JS)
     games.js             - All game data (edit this to add/change games)
+    charades-art.js      - OpenMoji SVGs for `art:` cards (generated: node tools/build-charades-art.mjs)
     sw.js                - Service worker (offline + update toast)
     manifest.webmanifest - PWA manifest
     icon-192/512.png     - PWA icons
@@ -136,6 +137,10 @@
   @keyframes dealback{from{transform:translateX(-70px) rotate(-5deg);opacity:0}to{transform:none;opacity:1}}
   .ckid{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:26px 20px;text-align:center}
   .ce{font-size:clamp(64px,20dvh,112px);line-height:1;filter:drop-shadow(0 6px 12px rgba(43,36,64,.15))}
+  .ce.art svg{display:block;height:clamp(110px,28dvh,210px);width:auto;max-width:70vw;margin:0 auto}
+  /* artSize:'small' games: the words are the card, the art is just a category badge */
+  .ckid.smallart .ce.art svg{height:clamp(56px,11dvh,84px)}
+  .ckid.smallart .ck{font-size:clamp(28px,8.4vw,40px);max-width:16ch}
   .ck{font-size:clamp(24px,6.4vw,32px);font-weight:900;letter-spacing:-.4px;line-height:1.2;max-width:22ch}
   .cparent{
     background:color-mix(in srgb,var(--hue) 12%,#fff);
@@ -225,6 +230,7 @@
 <body>
 <div id="app"></div>
 <script src="games.js"></script>
+<script src="charades-art.js"></script>
 <script src="family.js"></script>
 <script>
 'use strict';
@@ -302,7 +308,7 @@ async function checkForUpdates(btn){
   btn.dataset.checking='1';
   const orig=btn.textContent;
   btn.disabled=true; btn.textContent='🔄 Checking…';
-  const files=['index.html','games.js','family.js','sw.js'];
+  const files=['index.html','games.js','charades-art.js','family.js','sw.js'];
   const base=new URL('.',location.href).href;
   let changed=false, offline=false;
   const chkId=Date.now();
@@ -457,9 +463,10 @@ function cardHTML(g,card){
   }
   // std
   const trick=!!card.trick;
+  const art=card.art&&typeof ART!=='undefined'&&ART[card.art];
   return `
-    <div class="ckid">
-      <div class="ce">${card.e}</div>
+    <div class="ckid${g.artSize==='small'?' smallart':''}">
+      ${art?`<div class="ce art">${art}</div>`:`<div class="ce">${card.e}</div>`}
       <div class="ck">${card.k}</div>
     </div>
     <div class="cparent ${trick?'trick':''}">

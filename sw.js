@@ -1,5 +1,5 @@
-const CACHE = 'wait-v11';
-const ASSETS = ['./', './index.html', './games.js', './family.js', './manifest.webmanifest', './icon-192.png', './icon-512.png'];
+const CACHE = 'wait-v12';
+const ASSETS = ['./', './index.html', './games.js', './charades-art.js', './family.js', './manifest.webmanifest', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', e => {
   e.waitUntil(

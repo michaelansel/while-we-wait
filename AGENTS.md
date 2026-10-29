@@ -10,6 +10,8 @@ Pocket games for people stuck waiting somewhere — originally built for little 
 |------|---------|
 | `index.html` | App shell: HTML, CSS, and game engine JS |
 | `games.js` | **All public game data** — the only file you need to edit to add/change games |
+| `charades-art.js` | **Generated** OpenMoji SVGs for cards with an `art:` field. Rebuild with `node tools/build-charades-art.mjs` — never edit by hand |
+| `tools/build-charades-art.mjs` | Dev-time script: fetches the OpenMoji SVGs referenced in `games.js`, minifies them, writes `charades-art.js` |
 | `family.js` | Private/family content tier — fetches and merges non-public games. See "Private/Family Content Tier" below |
 | `sw.js` | Service worker for offline support + background update detection |
 | `manifest.webmanifest` | PWA manifest (name, icons, theme) |
@@ -40,6 +42,7 @@ Each game is one object in the `GAMES` array. Required fields:
   // Optional:
   plabel: 'FOR THE GROWN-UP', // overrides the helper-line label (e.g. 'FOR YOU TWO' for Date Night)
   pDefault: 'Fallback helper text used when a card has no own `p`',
+  artSize: 'small',           // render `art` as a small badge so the words are the card (Word Charades)
 }
 ```
 
@@ -52,6 +55,8 @@ A game's `kind` sets the *default* layout for its cards, but an individual card 
 { e: '🐶', k: 'Big kid prompt text', p: 'Parent helper script' }
 ```
 Optional: `trick: true` (used by Simon Says for trick rounds)
+
+Optional: `art: '1F418'` — an OpenMoji hexcode (Unicode or OpenMoji extras like `E006` narwhal; browse at openmoji.org). The card shows that OpenMoji illustration instead of the system emoji; `e` stays as the fallback. After adding or changing `art` values, run `node tools/build-charades-art.mjs` and commit the regenerated `charades-art.js` (the script fails loudly on unknown hexcodes). OpenMoji is CC BY-SA 4.0 — any game using `art` should credit it in its `how` text (see the charades games).
 
 **`kind: 'reveal'`** — Clue-based guessing (Animal Clues)
 ```js
