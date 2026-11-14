@@ -1,6 +1,6 @@
 const GAMES = [
 
-{ id:'hunt', name:'Treasure Hunt', emoji:'🔎', energy:'calm', hue:'#3DDC97', kind:'std',
+{ id:'hunt', name:'Treasure Hunt', emoji:'🔎', energy:'calm', hue:'#3DDC97', kind:'std', who:'kids', tags:['seated-friendly'],
   how:'Read the card, then ask: "Can you find something like this?" Pointing counts, touching is bonus (when it\u2019s okay to touch). Everybody hunts \u2014 grown-ups too.',
   cards:[
     {e:'🌵', k:'Find something SPIKY!', p:'Pokey plants, spiky hair, fence tips, a pineapple on a shirt\u2026'},
@@ -51,7 +51,7 @@ const GAMES = [
     {e:'🧀', k:'Find something with HOLES!', p:'The top of a salt shaker, a button, a straw, the holes in a cracker.'},
   ]},
 
-{ id:'ispy', name:'I Spy', emoji:'👁️', energy:'calm', hue:'#4CC9F0', kind:'std',
+{ id:'ispy', name:'I Spy', emoji:'👁️', energy:'calm', hue:'#4CC9F0', kind:'std', who:'kids', tags:['seated-friendly'],
   how:'Secretly pick something you can BOTH see that matches the card. Say the magic words \u2014 "I spy with my little eye\u2026" \u2014 and let them guess until they find it. Then swap: they spy, you guess (badly, for laughs).',
   cards:[
     {e:'🍓', k:'I spy\u2026 something RED', p:'Say: "I spy with my little eye, something RED." Wrong guesses get a "nooope!"'},
@@ -77,7 +77,7 @@ const GAMES = [
     {e:'🧊', k:'I spy\u2026 something COLD', p:'They may have to guess by touch: a drink, the window, an ice cube.'},
   ]},
 
-{ id:'count', name:'Count It!', emoji:'🧮', energy:'calm', hue:'#FFC93C', kind:'std',
+{ id:'count', name:'Count It!', emoji:'🧮', energy:'calm', hue:'#FFC93C', kind:'std', who:'kids', tags:['seated-friendly'],
   how:'Read the card and count together \u2014 point at each one as you go. Little ones: count to 5 and celebrate. Big ones: keep going and try to beat the card next time.',
   cards:[
     {e:'👟', k:'Count the SHOES!', p:'Just the ones you can see without moving. Boots count double? Your call.'},
@@ -103,7 +103,7 @@ const GAMES = [
     {e:'🧑\u200d🍳', k:'Count the HELPERS!', p:'People carrying plates or trays. Sneak a little wave if one spots you counting.'},
   ]},
 
-{ id:'animals', name:'Animal Clues', emoji:'🦁', energy:'calm', hue:'#FF9F43', kind:'reveal',
+{ id:'animals', name:'Animal Clues', emoji:'🦁', energy:'calm', hue:'#FF9F43', kind:'reveal', who:'kids', tags:['seated-friendly'],
   how:'Read the clues one at a time \u2014 pause for guesses after each. Start mysterious, get obvious. When they get it (or give up dramatically), tap Reveal and celebrate. Don\u2019t let them peek!',
   cards:[
     {e:'🐘', name:'an ELEPHANT!', clues:['I am very, very big and gray.','My nose is so long I can pick things up with it.','I have giant flappy ears. Toot toot!']},
@@ -133,7 +133,7 @@ const GAMES = [
 {e:'🐬', name:'a DOLPHIN!', clues:['I live in the ocean, but I am not a fish.','I am very, very smart and I love to leap out of the waves.','I splash and say eee-eee-eee!']},
   ]},
 
-{ id:'name5', name:'Name 5', emoji:'🖐️', energy:'calm', hue:'#9B5DE5', kind:'std',
+{ id:'name5', name:'Name 5', emoji:'🖐️', energy:'calm', hue:'#9B5DE5', kind:'std', who:'kids', tags:['seated-friendly'],
   how:'Read the category. They name 5 things that fit \u2014 hold up a finger for each one. Stuck at 3? Team up and finish together. High five when the hand is full!',
   cards:[
     {e:'🐾', k:'Name 5 ANIMALS!', p:'Any animals at all. Made-up sounds earn bonus points.'},
@@ -157,7 +157,7 @@ const GAMES = [
     {e:'👀', k:'Name 5 things you can SEE right now!', p:'The easiest one on purpose \u2014 pointing counts, naming it is bonus. Perfect for the littlest players.'},
   ]},
 
-{ id:'wyr', name:'Would You Rather', emoji:'🤔', energy:'calm', hue:'#F15BB5', kind:'choice',
+{ id:'wyr', name:'Would You Rather', emoji:'🤔', energy:'calm', hue:'#F15BB5', kind:'choice', who:'kids', tags:['seated-friendly'],
   pDefault:'Read both choices out loud. Everyone picks \u2014 then ask the magic question: "WHY?" Silly answers only. There are no wrong answers.',
   how:'Read both options with maximum drama. Everyone answers \u2014 grown-ups too \u2014 and then everyone asks each other WHY. The why is where it gets good.',
   cards:[
@@ -186,7 +186,7 @@ const GAMES = [
     {a:['🍪','live in a cookie house'], b:['🛏️','live in a pillow fort']},
   ]},
 
-{ id:'story', name:'Story Starters', emoji:'📖', energy:'calm', hue:'#5271FF', kind:'std',
+{ id:'story', name:'Story Starters', emoji:'📖', energy:'calm', hue:'#5271FF', kind:'std', who:'kids', tags:['seated-friendly'],
   how:'Read the starter with your best storyteller voice, then take turns: one sentence each. When they pause, ask "and THEN what happened?!" The story ends whenever you reach the front of the line \u2014 or when everyone is giggling too hard.',
   cards:[
     {e:'🐉', k:'The Hungry Little Dragon', p:'Say: "Once upon a time, a tiny dragon was SO hungry\u2026 but the only thing left to eat was\u2026" \u2014 their turn!'},
@@ -210,7 +210,7 @@ const GAMES = [
     {e:'🧦', k:'The Sock Drawer Monster', p:'Say: "A teeny-tiny monster lived in the sock drawer, and every night it\u2026"'},
   ]},
 
-{ id:'sounds', name:'Sound Detective', emoji:'👂', energy:'calm', hue:'#00B8A9', kind:'std',
+{ id:'sounds', name:'Sound Detective', emoji:'👂', energy:'calm', hue:'#00B8A9', kind:'std', who:'kids', tags:['seated-friendly'],
   how:'Whisper: "Detective ears\u2026 ON!" Close your eyes (or just look down at your shoes) and listen hard for what\u2019s on the card. Great for calming a wound-up kiddo in a loud place.',
   cards:[
     {e:'📢', k:'Listen for something LOUD', p:'Point (eyes still closed!) toward where it came from.'},
@@ -232,7 +232,7 @@ const GAMES = [
     {e:'📍', k:'Which sound is CLOSE and which is FAR?', p:'Pick two sounds. Point at the near one, then way off at the far one.'},
   ]},
 
-{ id:'rhyme', name:'Rhyme Time', emoji:'🎤', energy:'calm', hue:'#D96BFF', kind:'std',
+{ id:'rhyme', name:'Rhyme Time', emoji:'🎤', energy:'calm', hue:'#D96BFF', kind:'std', who:'kids', tags:['seated-friendly'],
   how:'Say the word on the card. Take turns saying words that rhyme with it \u2014 real words OR silly made-up ones. Can\u2019t think of one? Say it in a robot voice and try again. Keep going until you both run dry, then flip the card.',
   cards:[
     {e:'🐱', k:'CAT', p:'Hat, bat, mat, sat, rat\u2026 splat!'},
@@ -256,13 +256,13 @@ const GAMES = [
     {e:'⛵', k:'BOAT', p:'Goat, coat, note, float\u2026 moat!'},
   ]},
 
-{ id:'simon', name:'Simon Says', emoji:'🫡', energy:'active', hue:'#FF6B6B', kind:'std',
+{ id:'simon', name:'Simon Says', emoji:'🫡', energy:'active', hue:'#FF6B6B', kind:'std', who:'kids', tags:['seated-friendly'],
   how:'You\u2019re Simon! Read each card out loud EXACTLY as written. If it starts with "Simon says," they do it. If it doesn\u2019t \u2014 they should freeze! Got tricked? Giggle and keep playing. With very little ones, skip the tricks and just do the moves together.',
   cards:[
     {e:'👃', k:'Touch your nose', p:'Say: "Simon says\u2026 touch your nose!"'},
     {e:'🦶', k:'Touch your toes', p:'Say: "Simon says\u2026 touch your toes!"'},
     {e:'🙌', k:'Hands on your head', p:'Say: "Simon says\u2026 put your hands on your head!"', trick:false},
-    {e:'🐇', k:'Hop 3 times', p:'Say: "Simon says\u2026 hop three times!" Tiny hops \u2014 we\u2019re in a line.'},
+    {tags:[], e:'🐇', k:'Hop 3 times', p:'Say: "Simon says\u2026 hop three times!" Tiny hops \u2014 we\u2019re in a line.'},
     {e:'🪼', k:'Wiggle like jelly', p:'Say: "Simon says\u2026 wiggle like jelly!"'},
     {e:'🗿', k:'Freeze like a statue', p:'Say: "Simon says\u2026 freeze like a statue!" See how long they last.'},
     {e:'👀', k:'Blink super fast', p:'Say: "Simon says\u2026 blink as fast as you can!"'},
@@ -270,14 +270,14 @@ const GAMES = [
     {e:'🙆', k:'Arms up high', p:'Say: "Simon says\u2026 reach up as high as you can!"'},
     {e:'👏', k:'Three tiny claps', p:'Say: "Simon says\u2026 do three tiny quiet claps!"'},
     {e:'🥾', k:'Stomp softly', p:'TRICK! Say just: "Stomp your feet!" \u2014 freeze check!', trick:true},
-    {e:'🔄', k:'Turn around once', p:'Say: "Simon says\u2026 turn around one time!"'},
+    {tags:[], e:'🔄', k:'Turn around once', p:'Say: "Simon says\u2026 turn around one time!"'},
     {e:'🤪', k:'Make a silly face', p:'Say: "Simon says\u2026 make your silliest face!" You have to make one back.'},
     {e:'🐔', k:'Flap like a chicken', p:'TRICK! Say just: "Flap your wings!" \u2014 anyone flapping is a chicken.', trick:true},
     {e:'👍', k:'Thumbs up', p:'Say: "Simon says\u2026 give me a thumbs up!"'},
     {e:'🤫', k:'Whisper your name', p:'Say: "Simon says\u2026 whisper your name as quietly as you can."'},
     {e:'😁', k:'Biggest smile', p:'TRICK! Say just: "Smile really big!" \u2014 nobody can resist this one. Gotcha.', trick:true},
     {e:'👂', k:'Touch your ears', p:'Say: "Simon says\u2026 touch your ears!"'},
-    {e:'🦩', k:'Stand on one foot', p:'Say: "Simon says\u2026 stand on one foot like a flamingo!"'},
+    {tags:[], e:'🦩', k:'Stand on one foot', p:'Say: "Simon says\u2026 stand on one foot like a flamingo!"'},
     {e:'🫲', k:'Shake my hand', p:'TRICK! Say just: "Shake my hand!" while offering it. Diabolical. Shake anyway if they fall for it.', trick:true},
     {e:'👐', k:'Wiggle all ten fingers', p:'Say: "Simon says\u2026 wiggle all ten fingers like tiny wiggly worms!"'},
     {e:'🤷', k:'Shrug up to your ears', p:'Say: "Simon says\u2026 scrunch your shoulders WAY up to your ears\u2026 now let them flop down!"'},
@@ -290,21 +290,21 @@ const GAMES = [
     {e:'💋', k:'Blow a kiss', p:'TRICK! Say just: "Blow me a kiss!" \u2014 freeze check! (Blow one right back if they melt you.)', trick:true},
   ]},
 
-{ id:'freeze', name:'Freeze!', emoji:'🧊', energy:'active', hue:'#4CC9F0', kind:'std',
+{ id:'freeze', name:'Freeze!', emoji:'🧊', energy:'active', hue:'#4CC9F0', kind:'std', who:'kids', tags:['seated-friendly'],
   how:'Say "WIGGLE WIGGLE WIGGLE!" \u2014 everyone wiggle-dances in place. Then call "FREEZE!" and show the card: hold that pose while you count to five. Wobbling means giggling means go again. Pretending to BE the thing helps them hold still way longer.',
   cards:[
-    {e:'⭐', k:'Freeze like a STAR', p:'Arms and legs out wide. Count to 5 \u2014 slower each round.'},
-    {e:'🦩', k:'Freeze like a FLAMINGO', p:'One foot up! Grab a shoulder if the floor is lava-wobbly.'},
+    {tags:[], e:'⭐', k:'Freeze like a STAR', p:'Arms and legs out wide. Count to 5 \u2014 slower each round.'},
+    {tags:[], e:'🦩', k:'Freeze like a FLAMINGO', p:'One foot up! Grab a shoulder if the floor is lava-wobbly.'},
     {e:'🦸', k:'Freeze like a SUPERHERO', p:'Fists on hips, chin up, cape imaginary.'},
     {e:'🤖', k:'Freeze like a ROBOT', p:'Stiff arms, square angles. Powering down\u2026 beep\u2026 boop\u2026'},
-    {e:'😴', k:'Freeze like a SLEEPING CAT', p:'Standing up! Paw-hands, eyes closed, one tiny fake snore allowed.'},
-    {e:'🩰', k:'Freeze like a BALLERINA', p:'Up on tippy-toes, arms in a circle. Hardest one!'},
-    {e:'🦍', k:'Freeze like a GORILLA', p:'Big arms, knuckles low, mid chest-thump. Silent roar face.'},
+    {tags:[], e:'😴', k:'Freeze like a SLEEPING CAT', p:'Standing up! Paw-hands, eyes closed, one tiny fake snore allowed.'},
+    {tags:[], e:'🩰', k:'Freeze like a BALLERINA', p:'Up on tippy-toes, arms in a circle. Hardest one!'},
+    {tags:[], e:'🦍', k:'Freeze like a GORILLA', p:'Big arms, knuckles low, mid chest-thump. Silent roar face.'},
     {e:'🌳', k:'Freeze like a TREE', p:'Arms are branches. A gentle breeze may sway you\u2026 but just barely.'},
     {e:'🍝', k:'Freeze like SPAGHETTI', p:'First wiggle like cooked spaghetti\u2026 then FREEZE stiff like uncooked spaghetti!'},
-    {e:'🏄', k:'Freeze like a SURFER', p:'Knees bent, arms out, riding an invisible wave.'},
+    {tags:[], e:'🏄', k:'Freeze like a SURFER', p:'Knees bent, arms out, riding an invisible wave.'},
     {e:'💪', k:'Freeze like a STRONG-PERSON', p:'Double arm flex. Grrr face required.'},
-    {e:'🐭', k:'Freeze like a TINY MOUSE', p:'Crouch small-small-small. Whisker hands. Squeak once, then silence.'},
+    {tags:[], e:'🐭', k:'Freeze like a TINY MOUSE', p:'Crouch small-small-small. Whisker hands. Squeak once, then silence.'},
     {e:'🐢', k:'Freeze like a SCARED TURTLE', p:'Pull your head down into your shell \u2014 chin to chest, shoulders up, arms tucked tight. Nobody home!'},
     {e:'🦁', k:'Freeze like a PROUD LION', p:'Sit up tall, chest puffed out, big mane-hands framing your face. One silent, mighty roar.'},
     {e:'🧸', k:'Freeze like a FLOPPY TEDDY', p:'Go all floppy like a well-loved teddy \u2014 head tipped over, arms dangling. Frozen, but wobbly-soft.'},
@@ -314,7 +314,7 @@ const GAMES = [
     {e:'🦉', k:'Freeze like an OWL', p:'Huge round eyes, wing-arms folded in, head perfectly still on your branch. Whooo can hold it longest?'},
   ]},
 
-{ id:'walks', name:'Silly Walks', emoji:'🐧', energy:'active', hue:'#7BC950', kind:'std',
+{ id:'walks', name:'Silly Walks', emoji:'🐧', energy:'active', hue:'#7BC950', kind:'std', who:'kids', tags:[],
   how:'This one is FOR when the line moves! Each time you shuffle forward, walk to the next spot the way the card says. When the line stops \u2014 freeze in character until it moves again. The waiting becomes the game.',
   cards:[
     {e:'🤖', k:'Walk like a ROBOT', p:'Stiff legs, stiff arms. Beep with each step.'},
@@ -338,7 +338,7 @@ const GAMES = [
     {e:'🤠', k:'Mosey like a COWBOY', p:'Bow legs, thumbs in your belt, the slooowest mosey in the West. Tip your invisible hat: "howdy, partner."'},
   ]},
 
-{ id:'copycat', name:'Copycat', emoji:'🪞', energy:'active', hue:'#FF8FA3', kind:'std',
+{ id:'copycat', name:'Copycat', emoji:'🪞', energy:'active', hue:'#FF8FA3', kind:'std', who:'kids', tags:['seated-friendly'],
   how:'Do what the card says \u2014 kiddo copies you exactly. Then SWAP: they invent, you copy (mess it up a little; being copied badly is hilarious). Add speed for extra giggles.',
   cards:[
     {e:'👏', k:'Copy the CLAPS', p:'Clap a pattern: clap-clap-STOMP. They echo it. Make it one beat longer each round.'},
@@ -352,7 +352,7 @@ const GAMES = [
     {e:'🖐️', k:'Slow-motion high five', p:'The slowest high five in history. Dramatic wind-up. Gentle landing. "Niiiiice."'},
     {e:'🎾', k:'Sound Ball', p:'Pretend-throw a ball while making a silly sound \u2014 "BOING!" They catch it making the SAME sound, then throw it back with a NEW sound.'},
     {e:'🧺', k:'The Picnic Game', p:'Say: "I\u2019m going on a picnic and bringing\u2026 apples." They repeat the list and add one thing. How long can the list get?'},
-    {e:'🕺', k:'Copy the dance move', p:'One move at a time: spin, wiggle, point. String them into a tiny line-dance routine.'},
+    {tags:[], e:'🕺', k:'Copy the dance move', p:'One move at a time: spin, wiggle, point. String them into a tiny line-dance routine.'},
     {e:'🐰', k:'Animal hands', p:'Make bunny ears\u2026 a creeping snail\u2026 a flapping bird\u2026 a snapping crocodile. They copy each one. Then they invent an animal and YOU guess it.'},
     {e:'🎩', k:'Invisible dress-up', p:'Mime putting on a hat \u2014 they copy. Add glasses\u2026 a mustache\u2026 a superhero cape\u2026 Then admire each other: "Ooh, FANCY."'},
     {e:'🥱', k:'The contagious yawn', p:'Do your biggest, slowest fake yawn. Did they catch it? Yawns really are contagious \u2014 you\u2019re basically doing science.'},
@@ -362,7 +362,7 @@ const GAMES = [
     {e:'🤫', k:'Whisper echo', p:'Whisper a silly word in a funny voice \u2014 "noooooodles\u2026" They echo it exactly. Squeaky, growly, wobbly. The quietest game in the book.'},
   ]},
 
-{ id:'hands', name:'Hand Games', emoji:'✋', energy:'active', hue:'#FFB627', kind:'std',
+{ id:'hands', name:'Hand Games', emoji:'✋', energy:'active', hue:'#FFB627', kind:'std', who:'kids', tags:['seated-friendly'],
   how:'Every card is a tiny hand game \u2014 perfect for staying put. Read the card and play right there. Hands only, feet optional, giggles guaranteed.',
   cards:[
     {e:'✊', k:'Rock, Paper, Scissors', p:'"Rock, paper, scissors\u2026 SHOOT!" ✊ crushes ✌️, ✌️ cuts ✋, ✋ wraps ✊. Best of three. Littles can just copy your hand \u2014 that\u2019s a win too.'},
@@ -384,7 +384,7 @@ const GAMES = [
     {e:'🐟', k:'Once I Caught a Fish Alive', p:'"1, 2, 3, 4, 5 \u2014 once I caught a fish alive! 6, 7, 8, 9, 10 \u2014 then I let it go again." Which finger did it bite? "This little finger on the right!" Wiggle it. Ouch.'},
   ]},
 
-{ id:'feelings', name:'Feelings Faces', emoji:'😊', energy:'calm', hue:'#FF9770', kind:'std',
+{ id:'feelings', name:'Feelings Faces', emoji:'😊', energy:'calm', hue:'#FF9770', kind:'std', who:'kids', tags:['seated-friendly'],
   how:'Read the feeling out loud, then make that face together \u2014 the sillier the better. Ask "what makes YOU feel this way?" for bonus giggles and a peek into their day.',
   cards:[
     {e:'😄', k:'Show me your HAPPY face!', p:'Big smile, bright eyes, maybe a little wiggle. What made you happy today?'},
@@ -406,7 +406,7 @@ const GAMES = [
     {e:'🥰', k:'Show me your LOVING face!', p:'Warm smile, squishy cheeks, maybe a little self-hug. Who do you love the most?'},
   ]},
 
-{ id:'opposites', name:'Opposites', emoji:'⚖️', energy:'calm', hue:'#118AB2', kind:'std',
+{ id:'opposites', name:'Opposites', emoji:'⚖️', energy:'calm', hue:'#118AB2', kind:'std', who:'kids', tags:['seated-friendly'],
   how:'Read the question, point together, then say the answer out loud \u2014 no wrong guesses here. Bonus: act it out! Big means big arms, tiny means a teeny scrunch.',
   cards:[
     {e:'🐘🐭', k:'Which is BIGGER: an elephant or a mouse?', p:'Act it out \u2014 stomp-big arms for elephant, squeaky-tiny pinch for mouse. Then: what\u2019s even bigger than an elephant?'},
@@ -428,7 +428,7 @@ const GAMES = [
     {e:'🐊🥚', k:'Which is BUMPIER: a crocodile or an egg?', p:'Croc backs wear bumpy armor; eggs are smooth as can be. Find one bumpy thing and one smooth thing without leaving your seat.'},
   ]},
 
-{ id:'missing', name:'What\u2019s Missing?', emoji:'🔍', energy:'calm', hue:'#E76F51', kind:'std',
+{ id:'missing', name:'What\u2019s Missing?', emoji:'🔍', energy:'calm', hue:'#E76F51', kind:'std', who:'kids', tags:['seated-friendly'],
   how:'Line up a few small things on the table \u2014 a couple of forks, a sugar packet, a coaster. Let them stare hard and really memorize the lineup, then cover it all with a napkin (or your two hands). Sneak ONE thing away, whisk the napkin off, and gasp: "What\u2019s MISSING?!" Start with just 2 things for the littlest detectives \u2014 an easy, guaranteed win \u2014 then build up to 4, 5, or 6 as they get sharper. No table stuff handy? Use fingers, or things you both just picture in your heads. Then swap: they hide, you guess (get it wrong once \u2014 it\u2019s funnier that way).',
   cards:[
     {e:'🥄', k:'Just Two to Start', p:'The 3-year-old special: line up ONLY a spoon and a fork. Stare hard, cover with a napkin, sneak one into your lap. "Spoon or fork \u2014 which one ran away?" An easy first win before you make it trickier.'},
@@ -447,7 +447,7 @@ const GAMES = [
     {e:'🔄', k:'What MOVED?', p:'No hiding at all: line up 3 or 4 things, cover, then swap two of them so they trade places. Reveal: everything\u2019s still here \u2014 but what shuffled around? The trickiest one \u2014 save it for last.'},
   ]},
 
-{ id:'datenight', name:'Date Night', emoji:'🥂', energy:'calm', hue:'#FF5D8F', kind:'std', plabel:'FOR YOU TWO',
+{ id:'datenight', name:'Date Night', emoji:'🥂', energy:'calm', hue:'#FF5D8F', kind:'std', who:'grownups', tags:['seated-friendly'], plabel:'FOR YOU TWO',
   pDefault:'You both have to pick \u2014 no \u201cboth!\u201d allowed. Then say why.',
   how:'Read the card out loud. One of you answers first \u2014 then the other (no \u201csame!\u201d allowed, give your own answer). Follow-up questions are encouraged, phones are not.',
   cards:[
@@ -523,7 +523,7 @@ const GAMES = [
     {kind:'choice', a:['🧍','Ten minutes a day where time stops and you\u2019re alone'], b:['👫','Ten minutes a day where time stops and we\u2019re together']},
   ]},
 
-{ id:'calm', name:'Calm Down', emoji:'🌬️', energy:'calm', hue:'#A0C4FF', kind:'std',
+{ id:'calm', name:'Calm Down', emoji:'🌬️', energy:'calm', hue:'#A0C4FF', kind:'std', who:'kids', tags:['seated-friendly'],
   how:'Read the card together and try it slow \u2014 your calm voice sets the pace. There\u2019s no rush and no wrong way to breathe or squeeze. Repeat a favorite as many times as it takes.',
   cards:[
     {e:'🌈', k:'Breathe in\u2026 and paint a big rainbow in the sky!', p:'Trace an arch with one finger up and over while breathing in through the nose, then trace back down while breathing out. One big rainbow, one big breath.'},
@@ -552,7 +552,7 @@ const GAMES = [
     {e:'🌳', k:'Sit tall and sway your branches in a gentle breeze.', p:'Arms up like branches, sway side to side slowly and quietly. No wind storms allowed.'},
   ]},
 
-{ id:'redlight', name:'Red Light, Green Light', emoji:'🚦', energy:'active', hue:'#FF4D6D', kind:'std',
+{ id:'redlight', name:'Red Light, Green Light', emoji:'🚦', energy:'active', hue:'#FF4D6D', kind:'std', who:'kids', tags:[],
   how:'Best with space to run: park, yard, or empty lot. Everyone lines up, grown-up stands 10 big steps away and flips cards one at a time, calling them out LOUD. Move on green, freeze on red — anyone caught moving goes back 3 steps. First one to tag the caller becomes the light next. For the 2yo: shorter distance, no penalties — just run-and-freeze joy.',
   cards:[
     {e:'🟢', k:'GREEN LIGHT — GO GO GO!', p:'Everyone runs! Big eager running.'},
@@ -580,7 +580,7 @@ const GAMES = [
     {e:'💤', k:'SLEEPY LIGHT — freeze + snore', p:'Freeze standing up and let out ONE tiny fake snore. Zzzz.'},
   ]},
 
-{ id:'tag', name:'Tag! You\u2019re It', emoji:'🏃', energy:'active', hue:'#F8961E', kind:'std',
+{ id:'tag', name:'Tag! You\u2019re It', emoji:'🏃', energy:'active', hue:'#F8961E', kind:'std', who:'kids', tags:[],
   how:'Flip a card to pick which tag game you\u2019re playing. Grown-up is "it" first — little legs deserve a head start. Gentle taps only, trade off who chases, and agree on boundaries first: "we stay on the grass / in this corner."',
   cards:[
     {e:'🐢', k:'TURTLE TAG', p:'To be safe, drop to hands and knees — shell up! But no turtle forever: 5 counts, then back in the game.'},
@@ -599,7 +599,7 @@ const GAMES = [
     {e:'🐔', k:'CHICKEN TAG', p:'Flap your wings and bob your head the whole time you run. Bawk bawk!'},
   ]},
 
-{ id:'hop', name:'Hop & Jump', emoji:'🐸', energy:'active', hue:'#06D6A0', kind:'std',
+{ id:'hop', name:'Hop & Jump', emoji:'🐸', energy:'active', hue:'#06D6A0', kind:'std', who:'kids', tags:[],
   how:'Jumping games for a tiny space or a big field — no equipment needed. Grown-up counts, cheers, and marks landing spots with a foot or a leaf. For the 2yo: hold hands and jump together. For the 5yo: try to beat your own record.',
   cards:[
     {e:'🐰', k:'BUNNY HOPS — do 10!', p:'Two feet together, ears up. Hold hands for the little ones and count out loud together.'},
@@ -624,7 +624,7 @@ const GAMES = [
     {e:'🐇', k:'BUNNY RACE', p:'Bunny-hop from here to that tree/door — ready, set, HOP! Race your grown-up.'},
   ]},
 
-{ id:'quest', name:'Playground Quest', emoji:'🛝', energy:'active', hue:'#4361EE', kind:'std',
+{ id:'quest', name:'Playground Quest', emoji:'🛝', energy:'active', hue:'#4361EE', kind:'std', who:'kids', tags:[],
   how:'Real playground required! Flip a card and complete the quest on the equipment. Finish 3 quests in a row to become Playground Champions. Skip anything too big for you — there\u2019s no shame in the tiny slide.',
   cards:[
     {e:'🛝', k:'TRIPLE SLIDE', p:'Go down the slide 3 ways: feet first, super slow, and with your silliest pose.'},
@@ -649,7 +649,7 @@ const GAMES = [
     {e:'🙌', k:'HIGH-TEN FINALE', p:'Meet at the bottom of the slide for the champion high-ten. Playground Champions, UNITE!'},
   ]},
 
-{ id:'leader', name:'Follow the Leader', emoji:'🐥', energy:'active', hue:'#7B2CBF', kind:'std',
+{ id:'leader', name:'Follow the Leader', emoji:'🐥', energy:'active', hue:'#7B2CBF', kind:'std', who:'kids', tags:[],
   how:'One leader, everyone else copies — perfect for a 2yo who\u2019ll copy anything and a 5yo who wants to BE the leader. Take turns: each card, a new leader picks the move and everyone copies it for 10 seconds. Grown-up goes first to show how it\u2019s done (and be maximally embarrassing).',
   cards:[
     {e:'🦆', k:'DUCKLING LINE', p:'Everyone waddles in a line quack-quack-quack. Leader in front!'},
@@ -674,7 +674,7 @@ const GAMES = [
     {e:'🪩', k:'DISCO POINT', p:'Point up-left! Point down-right! Point at MOM! Point at DAD!'},
   ]},
 
-{ id:'bugs', name:'Bug Safari', emoji:'🐞', energy:'calm', hue:'#8FBF3F', kind:'std',
+{ id:'bugs', name:'Bug Safari', emoji:'🐞', energy:'calm', hue:'#8FBF3F', kind:'std', who:'kids', tags:[],
   how:'A sit-down-or-squat safari for tiny explorers. Look under rocks, in the grass, on tree trunks — but be gentle: bugs are neighbors, not toys. Put rocks and logs back the way you found them (that\u2019s their house!). Grown-up = safari guide and official wriggler-noticer.',
   cards:[
     {e:'🐜', k:'Find an ANT line and follow it!', p:'Watch where they\u2019re all going. Are they carrying something? Ants are always busy — where do you think their office is?'},
@@ -701,32 +701,32 @@ const GAMES = [
     {e:'🐞', k:'BE a bug for one minute', p:'Crawl low, sniff the ground, blink a lot. What does the world look like from down there?'},
   ]},
 
-{ id:'wonder', name:'Sit & Wonder', emoji:'🌥️', energy:'calm', hue:'#8CA9D3', kind:'std',
+{ id:'wonder', name:'Sit & Wonder', emoji:'🌥️', energy:'calm', hue:'#8CA9D3', kind:'std', who:'kids', tags:[],
   how:'The slow, dreamy side of outdoors: sit in the grass (or on a bench, or a curb) and notice the world. Great for winding down after active games, or for a kid who\u2019s done running. Grown-up does the noticing too — the sky and the tiny stuff are weirdly interesting.',
   cards:[
-    {e:'☁️', k:'What do you see in the clouds?', p:'Lying back makes this easier. A dragon? A pancake? Whoever spots it first names it, everyone else has to find it.'},
-    {e:'🏎️', k:'Cloud race!', p:'Pick two clouds and watch which one gets to the tree/pole/edge first. Clouds are slower than anything, and somehow still exciting.'},
-    {e:'🍃', k:'Feel the breeze. Where is it going?', p:'Close your eyes for a moment. Face, arms, the back of your neck — the wind touches everywhere. Which direction is it headed?'},
-    {e:'👃', k:'Sniff the air like a detective', p:'What does outside smell like today? Grass? Rain coming? Dirt? A restaurant? Flowers? Every day smells a little different.'},
-    {e:'👂', k:'Eyes closed: count 5 different sounds', p:'Take turns pointing at each sound you hear: cars, birds, wind, a dog, a door. The world is loud when you actually listen.'},
+    {tags:['seated-friendly'], e:'☁️', k:'What do you see in the clouds?', p:'Lying back makes this easier. A dragon? A pancake? Whoever spots it first names it, everyone else has to find it.'},
+    {tags:['seated-friendly'], e:'🏎️', k:'Cloud race!', p:'Pick two clouds and watch which one gets to the tree/pole/edge first. Clouds are slower than anything, and somehow still exciting.'},
+    {tags:['seated-friendly'], e:'🍃', k:'Feel the breeze. Where is it going?', p:'Close your eyes for a moment. Face, arms, the back of your neck — the wind touches everywhere. Which direction is it headed?'},
+    {tags:['seated-friendly'], e:'👃', k:'Sniff the air like a detective', p:'What does outside smell like today? Grass? Rain coming? Dirt? A restaurant? Flowers? Every day smells a little different.'},
+    {tags:['seated-friendly'], e:'👂', k:'Eyes closed: count 5 different sounds', p:'Take turns pointing at each sound you hear: cars, birds, wind, a dog, a door. The world is loud when you actually listen.'},
     {e:'🍀', k:'Hunt for a lucky clover', p:'Find a patch and search slowly. Four leaves = legendary. Three leaves are still very lucky, statistically speaking.'},
     {e:'🌼', k:'Blow a dandelion wish', p:'Find the fluffy kind. One deep breath… make your wish… BLOW! Count how many seeds fly off.'},
     {e:'🍂', k:'Collect 5 different leaves', p:'Big, tiny, pointy, smooth, with holes — five different ones in a row on the ground. Line them up biggest to smallest.'},
     {e:'🪨', k:'Find your favorite rock', p:'Smooth or bumpy? Heavy or light? Sparkly? Every rock collector has a favorite. What do you like about yours?'},
-    {e:'🐦', k:'Watch for birds (freeze like a statue)', p:'Sit still and quiet for one minute. Birds come back when you\u2019re statue-still. Count how many you spot or hear.'},
-    {e:'🐿️', k:'Squirrel watch', p:'Find one and follow what it does: nuts? climbing? yelling at another squirrel? Squirrels are basically tiny cartoon characters.'},
+    {tags:['seated-friendly'], e:'🐦', k:'Watch for birds (freeze like a statue)', p:'Sit still and quiet for one minute. Birds come back when you\u2019re statue-still. Count how many you spot or hear.'},
+    {tags:['seated-friendly'], e:'🐿️', k:'Squirrel watch', p:'Find one and follow what it does: nuts? climbing? yelling at another squirrel? Squirrels are basically tiny cartoon characters.'},
     {e:'🌸', k:'Smell three flowers (or leaves!)', p:'Gentle noses only — sniff, don\u2019t pick. Which one smells the best? Some smell like nothing, some smell like celery.'},
     {e:'🌿', k:'Grass-blade whistle', p:'Pinch a blade of grass between your thumbs and blow. It\u2019s tricky! Grown-ups often fail at this too, which is the fun part.'},
-    {e:'🐜', k:'Tiny world: stare at one patch of grass', p:'Pick a spot the size of your hand and look CLOSE. There\u2019s a whole city in there — movers, builders, fliers. Report what you see.'},
+    {tags:['seated-friendly'], e:'🐜', k:'Tiny world: stare at one patch of grass', p:'Pick a spot the size of your hand and look CLOSE. There\u2019s a whole city in there — movers, builders, fliers. Report what you see.'},
     {e:'👤', k:'Trace your shadow with your finger', p:'Trace yourself in the air along the ground. Now make your shadow jump, wave, and sit down. You never move — your shadow is a copycat.'},
     {e:'🌤️', k:'Find the warm spot and the cool spot', p:'Walk around with your palm out: where is the sun-warm? Where is the cool breeze? Pick your sitting spot based on the weather report from your hand.'},
     {e:'🦶', k:'Barefoot grass test', p:'If it\u2019s allowed and safe: shoes off, feet in the grass. Is it pokey? Soft? Cold? Wet? Describe it in three words.'},
     {e:'🌳', k:'Pick a tree and say hello', p:'Every tree is somebody: rough bark? smooth? Is it bigger or older than grandpa? Visit the same tree every time — it\u2019s your tree now.'},
-    {e:'🤫', k:'The one-minute quiet game', p:'Everyone sits and stays silent for one whole minute. Then share the weirdest thing you noticed. Waiting in line? This is the whole game.'},
-    {e:'💗', k:'Tell each other your favorite part', p:'Safari debrief! Everyone shares one thing they saw or found today. Grown-ups go first, and it has to be specific.'},
+    {tags:['seated-friendly'], e:'🤫', k:'The one-minute quiet game', p:'Everyone sits and stays silent for one whole minute. Then share the weirdest thing you noticed. Waiting in line? This is the whole game.'},
+    {tags:['seated-friendly'], e:'💗', k:'Tell each other your favorite part', p:'Safari debrief! Everyone shares one thing they saw or found today. Grown-ups go first, and it has to be specific.'},
   ]},
 
-{ id:'charades-pics', name:'Picture Charades', emoji:'🎭', energy:'active', hue:'#EF476F', kind:'std', plabel:'WHISPER TO THE ACTOR',
+{ id:'charades-pics', name:'Picture Charades', emoji:'🎭', energy:'active', hue:'#EF476F', kind:'std', who:'kids', tags:[], plabel:'WHISPER TO THE ACTOR',
   how:'Show the card ONLY to the actor — everyone else looks away! The actor acts out the picture with no words and no sounds, and everyone else shouts guesses. Little ones who can\u2019t read act straight from the picture; whisper the helper line in their ear if they get stuck. First right guess gets to act next. Illustrations: OpenMoji (openmoji.org), CC BY-SA 4.0.',
   cards:[
     {art:'1F418', e:'🐘', k:'Be an ELEPHANT', p:'Swing one arm like a long trunk. Big slow stomps!'},
@@ -910,7 +910,7 @@ const GAMES = [
     {art:'1F37F', e:'🍿', k:'Be a POPCORN kernel', p:'Crouch… heat up… POP! Jump up!'},
   ]},
 
-{ id:'charades-words', name:'Word Charades', emoji:'🎬', energy:'active', hue:'#3A86FF', kind:'std', artSize:'small', plabel:'ACTOR ONLY — NO PEEKING',
+{ id:'charades-words', name:'Word Charades', emoji:'🎬', energy:'active', hue:'#3A86FF', kind:'std', who:'kids', tags:[], artSize:'small', plabel:'ACTOR ONLY — NO PEEKING',
   how:'For readers and grown-ups. The actor reads the card secretly, then acts it out — no talking, no sounds, no pointing at things that spell it. Classic signs: show the category first (crank a movie camera, open a book, sing into a mic, air quotes for a saying), hold up fingers for the number of words, then fingers again for which word you\u2019re on. Tug your ear for \u201csounds like.\u201d Stars on the card show how hard it is (★ easy, ★★★ tricky). Illustrations: OpenMoji (openmoji.org), CC BY-SA 4.0.',
   cards:[
     {k:'Building a sandcastle', p:'Action · 3 words · ★ — Just act it out — no category sign needed.'},

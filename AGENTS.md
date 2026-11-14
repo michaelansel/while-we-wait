@@ -34,7 +34,9 @@ Each game is one object in the `GAMES` array. Required fields:
   id: 'unique-slug',        // URL-safe identifier
   name: 'Display Name',     // shown on home screen
   emoji: '🎯',               // home screen icon
-  energy: 'calm' | 'active', // filter category
+  energy: 'calm' | 'active', // ENERGY LEVEL (not movement) — filter facet
+  who: 'kids' | 'grownups',  // audience — filter facet
+  tags: ['seated-friendly'], // [] = known not seated; omitted = unknown — filter facet
   hue: '#HEX',              // accent color for the game
   kind: 'std' | 'reveal' | 'choice',  // determines default card layout
   how: 'Instructions...',   // shown in rules sheet
@@ -68,7 +70,18 @@ Optional: `art: '1F418'` — an OpenMoji hexcode (Unicode or OpenMoji extras lik
 ```js
 { a: ['🐒', 'option A text'], b: ['🪶', 'option B text'] }
 ```
-If a card has no own `p`, the game's `pDefault` (if set) is shown as the helper line.
+If a card has no own `p`, the game's `pDefault` (if set) is shown as the helper line. This holds for every kind, `std` included.
+
+### Tags and filters
+
+The home screen filters on three facets, in two chip rows: **who** (All / Kids / Grown-ups), **🪑 Seated** (a toggle) and **energy** (Calm / Active; tap again to clear). The choice is saved per device in `localStorage` (`wwFilter`).
+
+- `who`, `tags` and `energy` on a **deck** are defaults for its cards. A **card** may carry its own `who`, `tags` or `energy`, which **replaces** the deck's value for that card (it is not merged). So a standing-only card in a seated deck carries `tags:[]`, and a seated card in a standing deck carries `tags:['seated-friendly']`. See `simon`, `freeze`, `copycat` and `wonder`.
+- **`seated-friendly`** = playable sitting down without getting up: a car seat, a restaurant table, a waiting-room chair. No standing, walking or crouching. (Whether you can reach or touch the other player is a separate question, not yet tagged; Hand Games is seated but needs a partner within reach.)
+- **`energy`** is how revved-up the game gets, not whether bodies move. Simon Says is active even though most of it works seated.
+- Missing `tags` means *unknown*, and the seated filter hides unknowns. Tag every new deck.
+- A deck tile shows when **any** of its cards match; its count reads `n of m` when the filter trims it. Opening the deck deals only the matching cards (`state.idx`). A 🪑 badge means every card works seated.
+- Facet values in use today: `who` = `kids`, `grownups`; `tags` = `seated-friendly`. New facets need a chip row in `renderHome()` and a test in `cardMatches()`.
 
 Home screen card counts update automatically from the data.
 

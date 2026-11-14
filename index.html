@@ -65,7 +65,12 @@
   .home-head h1{font-size:34px;font-weight:900;letter-spacing:-.5px}
   .home-head h1 .cards{display:inline-block;transform:rotate(-8deg);margin-right:6px}
   .home-head p{color:var(--ink-soft);font-size:15px;font-weight:600;margin-top:4px}
-  .chips{display:flex;gap:8px;justify-content:center;margin:16px 0 14px}
+  .chips{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:16px 0 0}
+  .chips + .chips{margin-top:8px}
+  .chips-end{height:14px}
+  .badge.seated{background:#ECE6F6;color:#5B4A8A}
+  .empty{text-align:center;color:var(--ink-soft);font-weight:700;padding:28px 10px}
+  .empty button{margin-top:12px}
   .chip{
     border:2px solid var(--line);background:var(--card);color:var(--ink-soft);
     font:inherit;font-size:14px;font-weight:800;padding:9px 16px;border-radius:999px;
@@ -238,7 +243,7 @@
 /* ════════════════ ENGINE ════════════════ */
 const app = document.getElementById('app');
 const state = {
-  filter:'all', gameId:null, order:[], pos:0, revealed:false,
+  filter:loadFilter(), gameId:null, idx:[], order:[], pos:0, revealed:false,
   seenRules:new Set(), wake:false, wakeLock:null,
   familyUnlocked:!!(window.familyState&&window.familyState.fromCache),
 };
@@ -250,10 +255,45 @@ function shuffle(n){
 }
 const byId = id => GAMES.find(g=>g.id===id);
 
+/* ── Filters ──
+   Three facets: who (kids / grownups), seated (tag 'seated-friendly'), energy
+   (calm / active = energy level, not movement). A deck's who / tags / energy
+   are defaults for its cards; a card's own field REPLACES the deck's (so a
+   card in a seated deck that needs standing carries tags:[]). Missing tags =
+   unknown, which the seated filter treats as "no". A deck shows if any card
+   matches; opening it deals only the matching cards. See AGENTS.md. */
+function loadFilter(){
+  const f={who:'all',seated:false,energy:'all'};
+  try{
+    const s=JSON.parse(localStorage.getItem('wwFilter')||'null');
+    if(s&&typeof s==='object'){
+      if(['kids','grownups'].includes(s.who)) f.who=s.who;
+      if(s.seated===true) f.seated=true;
+      if(['calm','active'].includes(s.energy)) f.energy=s.energy;
+    }
+  }catch(e){}
+  return f;
+}
+function saveFilter(){ try{localStorage.setItem('wwFilter',JSON.stringify(state.filter));}catch(e){} }
+const cardWho=(g,c)=>c.who||g.who;
+const cardTags=(g,c)=>Array.isArray(c.tags)?c.tags:(Array.isArray(g.tags)?g.tags:null);
+const cardEnergy=(g,c)=>c.energy||g.energy;
+const isSeated=(g,c)=>{const t=cardTags(g,c);return !!t&&t.includes('seated-friendly');};
+function cardMatches(g,c){
+  const f=state.filter;
+  if(f.who!=='all' && cardWho(g,c)!==f.who) return false;
+  if(f.seated && !isSeated(g,c)) return false;
+  if(f.energy!=='all' && cardEnergy(g,c)!==f.energy) return false;
+  return true;
+}
+const matchIdx=g=>g.cards.reduce((a,c,i)=>(cardMatches(g,c)&&a.push(i),a),[]);
+function dealOrder(){ return shuffle(state.idx.length).map(i=>state.idx[i]); }
+const deckLen=()=>state.order.length;
+
 /* ── Home ── */
 function renderHome(){
   state.gameId=null;
-  const list = GAMES.filter(g=>state.filter==='all'||g.energy===state.filter);
+  const list = GAMES.map(g=>({g,n:matchIdx(g).length})).filter(x=>x.n>0);
   const totalCards = GAMES.reduce((n,g)=>n+g.cards.length,0);
   app.innerHTML = `
     <div class="home-head">
@@ -261,16 +301,22 @@ function renderHome(){
       <p>${GAMES.length} pocket games \u00b7 ${totalCards} cards \u00b7 zero screens for them, one for you</p>
     </div>
     <div class="chips">
-      ${chip('all','All')}${chip('calm','🧘 Calm')}${chip('active','⚡ Active')}
+      ${chip('who','all','All')}${chip('who','kids','🧒 Kids')}${chip('who','grownups','🥂 Grown-ups')}
     </div>
+    <div class="chips">
+      ${chip('seated',true,'🪑 Seated')}${chip('energy','calm','🧘 Calm')}${chip('energy','active','⚡ Active')}
+    </div>
+    <div class="chips-end"></div>
+    ${list.length?'':`<div class="empty">No games match all of these filters.<br><button class="chip" id="clearf">Clear filters</button></div>`}
     <div class="grid">
-      ${list.map(g=>`
+      ${list.map(({g,n})=>`
         <button class="tile" style="--hue:${g.hue}" data-game="${g.id}">
           <span class="te">${g.emoji}</span>
           <span class="tn">${g.name}</span>
           <span class="tm">
             <span class="badge ${g.energy}">${g.energy==='calm'?'CALM':'ACTIVE'}</span>
-            <span class="tcount">${g.cards.length} cards</span>
+            ${g.cards.every(c=>isSeated(g,c))?'<span class="badge seated" title="Every card works seated">🪑</span>':''}
+            <span class="tcount">${n===g.cards.length?`${n} cards`:`${n} of ${g.cards.length}`}</span>
           </span>
         </button>`).join('')}
     </div>
@@ -281,10 +327,19 @@ function renderHome(){
       <button class="wake" id="updatebtn">🔄 Check for updates</button>
       <span class="credit">Works offline \u00b7 no internet needed once loaded</span>
     </div>`;
-  app.querySelectorAll('.chip').forEach(c=>c.onclick=()=>{state.filter=c.dataset.f;renderHome();});
+  app.querySelectorAll('.chip[data-k]').forEach(c=>c.onclick=()=>{
+    const f=state.filter, k=c.dataset.k, v=c.dataset.v;
+    if(k==='who') f.who=v;
+    else if(k==='seated') f.seated=!f.seated;
+    else if(k==='energy') f.energy=(f.energy===v?'all':v);
+    saveFilter(); renderHome();
+  });
+  const cf=document.getElementById('clearf');
+  if(cf) cf.onclick=()=>{state.filter={who:'all',seated:false,energy:'all'};saveFilter();renderHome();};
   app.querySelectorAll('.tile').forEach(t=>t.onclick=()=>openGame(t.dataset.game));
   document.getElementById('surprise').onclick=()=>{
-    const g=GAMES[Math.floor(Math.random()*GAMES.length)];
+    const pool=list.length?list.map(x=>x.g):GAMES;
+    const g=pool[Math.floor(Math.random()*pool.length)];
     openGame(g.id);
   };
   document.getElementById('wakebtn').onclick=toggleWake;
@@ -379,15 +434,18 @@ async function checkForUpdates(btn){
   }
   setTimeout(()=>{ btn.textContent=orig; },3000);
 }
-function chip(f,label){
-  return `<button class="chip ${state.filter===f?'on':''}" data-f="${f}">${label}</button>`;
+function chip(k,v,label){
+  const on=k==='seated'?state.filter.seated:state.filter[k]===v;
+  return `<button class="chip ${on?'on':''}" data-k="${k}" data-v="${v}">${label}</button>`;
 }
 
 /* ── Game ── */
 function openGame(id){
   const g=byId(id);
   state.gameId=id;
-  state.order=shuffle(g.cards.length);
+  state.idx=matchIdx(g);
+  if(!state.idx.length) state.idx=g.cards.map((c,i)=>i);
+  state.order=dealOrder();
   state.pos=0;
   state.revealed=false;
   const start=()=>renderGame(g);
@@ -427,16 +485,16 @@ function renderGame(g){
 }
 
 function nav(g,dir){
-  if(dir>0 && state.pos>=g.cards.length-1 && !isDone()){ renderDone(g); return; }
+  if(dir>0 && state.pos>=deckLen()-1 && !isDone()){ renderDone(g); return; }
   if(isDone() && dir>0){ // shuffle & restart
-    state.order=shuffle(g.cards.length); state.pos=0; state.revealed=false;
+    state.order=dealOrder(); state.pos=0; state.revealed=false;
     paintCard(g,'deal'); updateCtrls(g); return;
   }
   if(isDone() && dir<0){ // back out of the done screen to the last card
     state.revealed=false; paintCard(g,'dealback'); return;
   }
   const np=state.pos+dir;
-  if(np<0||np>=g.cards.length) return;
+  if(np<0||np>=deckLen()) return;
   state.pos=np; state.revealed=false;
   paintCard(g,dir>0?'deal':'dealback');
 }
@@ -509,7 +567,7 @@ function cardHTML(g,card){
       <div class="ck">${card.k}</div>
     </div>
     <div class="cparent ${trick?'trick':''}">
-      <span class="plabel">${trick?'\ud83d\udea8 TRICK CARD \u2014 KID CAN\u2019T READ THIS':plabel}</span>${card.p}
+      <span class="plabel">${trick?'\ud83d\udea8 TRICK CARD \u2014 KID CAN\u2019T READ THIS':plabel}</span>${card.p||g.pDefault||''}
     </div>`;
 }
 
@@ -523,8 +581,8 @@ function updateCtrls(g){
     nb.textContent='\ud83d\udd00 Shuffle & deal again';
     pb.disabled=false;
   } else {
-    c.textContent=`Card ${state.pos+1} of ${g.cards.length}`;
-    nb.textContent=(state.pos>=g.cards.length-1)?'Finish deck \ud83c\udf89':'Next card \u2192';
+    c.textContent=`Card ${state.pos+1} of ${deckLen()}`;
+    nb.textContent=(state.pos>=deckLen()-1)?'Finish deck \ud83c\udf89':'Next card \u2192';
     pb.disabled=state.pos===0;
   }
 }
@@ -536,7 +594,7 @@ function renderDone(g){
     <div class="done">
       <div class="de">\ud83c\udf89</div>
       <h2>Deck complete!</h2>
-      <p>You survived ${g.cards.length} cards of ${g.name}.<br>Is the line still going?! Shuffle up or grab another game.</p>
+      <p>You survived ${deckLen()} cards of ${g.name}.<br>Is the line still going?! Shuffle up or grab another game.</p>
     </div>`;
   updateCtrls(g);
   const r=face.getBoundingClientRect();
@@ -551,7 +609,7 @@ function showRules(g){
     <div class="sheet" style="--hue:${g.hue}">
       <div class="se">${g.emoji}</div>
       <h2>${g.name}</h2>
-      <div class="ssub">${g.energy==='calm'?'\ud83e\uddd8 calm game':'\u26a1 active game'} \u00b7 ${g.cards.length} cards</div>
+      <div class="ssub">${g.energy==='calm'?'\ud83e\uddd8 calm game':'\u26a1 active game'} \u00b7 ${deckLen()<g.cards.length?`${deckLen()} of ${g.cards.length} cards (filtered)`:`${g.cards.length} cards`}</div>
       <p class="show">${g.how}</p>
       <button class="gobtn">Let\u2019s play \u2192</button>
     </div>`;
