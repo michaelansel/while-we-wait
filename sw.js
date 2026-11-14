@@ -1,4 +1,4 @@
-const CACHE = 'wait-v12';
+const CACHE = 'wait-v13';
 const ASSETS = ['./', './index.html', './games.js', './charades-art.js', './family.js', './manifest.webmanifest', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', e => {
@@ -37,6 +37,12 @@ function hasChanged(cached, fresh) {
 }
 
 self.addEventListener('fetch', e => {
+  // Only handle this app's own files. A page's fetch events fire for EVERY
+  // URL it requests, not just ones under the SW scope — without this the
+  // authenticated /while-we-wait-family/ fetch was cached here (Cache match
+  // ignores the Authorization header) and served stale, even after a lock.
+  // family.js keeps its own offline copy; let it talk to the network.
+  if (!e.request.url.startsWith(self.registration.scope)) return;
   // Navigations: NETWORK-FIRST. The old always-cached-first behavior could get
   // permanently stuck: revalidation went through the browser HTTP cache (no
   // Cache-Control headers from the server), a stale copy compared "unchanged"

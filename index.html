@@ -239,7 +239,8 @@
 const app = document.getElementById('app');
 const state = {
   filter:'all', gameId:null, order:[], pos:0, revealed:false,
-  seenRules:new Set(), wake:false, wakeLock:null, familyUnlocked:false,
+  seenRules:new Set(), wake:false, wakeLock:null,
+  familyUnlocked:!!(window.familyState&&window.familyState.fromCache),
 };
 
 function shuffle(n){
@@ -276,7 +277,7 @@ function renderHome(){
     <button class="surprise" id="surprise">🎲 Deal me a random game</button>
     <div class="home-foot">
       <button class="wake ${state.wake?'on':''}" id="wakebtn">${state.wake?'☕ Screen staying awake':'🌙 Keep screen awake'}</button>
-      <button class="wake ${state.familyUnlocked?'on':''}" id="familybtn">${state.familyUnlocked?'🔓 Family games unlocked':'🔒 Unlock family games'}</button>
+      <button class="wake ${state.familyUnlocked?'on':''}" id="familybtn">${familyLabel()}</button>
       <button class="wake" id="updatebtn">🔄 Check for updates</button>
       <span class="credit">Works offline \u00b7 no internet needed once loaded</span>
     </div>`;
@@ -290,13 +291,38 @@ function renderHome(){
   document.getElementById('familybtn').onclick=handleFamilyBtn;
   document.getElementById('updatebtn').onclick=e=>checkForUpdates(e.currentTarget);
 }
+/* Family button label. "saved for offline <date>" = the last time the server
+   confirmed this device's copy is current (see family.js / AGENTS.md). */
+function familyLabel(){
+  const fs=window.familyState;
+  if(!state.familyUnlocked) return '🔒 Unlock family games';
+  if(fs&&fs.stalePass) return '🔓 Family games \u00b7 re-enter passphrase';
+  const t=fs&&(fs.checkedAt||fs.savedAt);
+  if(!t) return '🔓 Family games unlocked';
+  const d=new Date(t).toLocaleDateString(undefined,{month:'short',day:'numeric'});
+  return `🔓 Family games \u00b7 saved for offline ${d}`;
+}
+const LOCK_CONFIRM='Forget the family passphrase and family games on this device?';
 async function handleFamilyBtn(){
-  if(state.familyUnlocked){
-    if(confirm('Forget the family passphrase on this device?')) familyLock();
+  const fs=window.familyState;
+  if(state.familyUnlocked && !(fs&&fs.stalePass)){
+    if(confirm(LOCK_CONFIRM)) familyLock();
     return;
   }
   const ok=await familyUnlockPrompt();
-  if(ok){ state.familyUnlocked=true; renderHome(); }
+  const how=fs&&fs.lastPrompt;
+  if(ok){
+    state.familyUnlocked=true; renderHome();
+    if(how==='changed') showUpdateToast();
+  }else if(how==='cancel' && state.familyUnlocked && confirm(LOCK_CONFIRM)){
+    familyLock();
+  }
+}
+/* Result of a background family refresh (load, resume, or update check). */
+function onFamilyRefresh(s){
+  if(s==='changed') showUpdateToast();
+  if(s==='merged'||s==='same'||s==='changed') state.familyUnlocked=true;
+  if(!state.gameId) renderHome(); // only re-paint if still on the home screen
 }
 /* Manual update check: the SW's auto-detection only fires when its fetch
    handler sees requests (and relies on header comparison), which can miss.
@@ -312,22 +338,35 @@ async function checkForUpdates(btn){
   const base=new URL('.',location.href).href;
   let changed=false, offline=false;
   const chkId=Date.now();
-  await Promise.all(files.map(async f=>{
+  // Same 15 s cap as family.js: on weak signal a fetch can hang for minutes.
+  const tfetch=(u,o)=>{
+    const c=typeof AbortController==='function'?new AbortController():null;
+    const t=c&&setTimeout(()=>c.abort(),15000);
+    return fetch(u,{...(o||{}),signal:c?c.signal:undefined}).finally(()=>t&&clearTimeout(t));
+  };
+  const familyProbe=(typeof familyCheck==='function')
+    ? familyCheck().then(s=>{
+        if(s==='changed') changed=true;
+        else if(s==='error') offline=true;
+        if(s!=='error'&&s!=='none') onFamilyRefreshQuiet(s);
+      }).catch(()=>{})
+    : Promise.resolve();
+  await Promise.all([familyProbe, ...files.map(async f=>{
     try{
       // Compare "what the page is running" vs "what the server has".
       // Plain fetch → SW serves its cached copy (what this page loaded).
       // Cache-busting query param → SW's cache.match() misses → true
       // network copy. The ?ck fetch is skipped by the SW cache (see sw.js).
       const [runRes,freshRes]=await Promise.all([
-        fetch(new URL(f,base).href).catch(()=>null),
-        fetch(new URL(f+'?ck='+chkId,base).href,{cache:'no-store'}).catch(()=>null)
+        tfetch(new URL(f,base).href).catch(()=>null),
+        tfetch(new URL(f+'?ck='+chkId,base).href,{cache:'no-store'}).catch(()=>null)
       ]);
       if(!freshRes||!freshRes.ok){ offline=true; return; }
       if(!runRes||!runRes.ok){ changed=true; return; }
       const [runText,freshText]=await Promise.all([runRes.text(),freshRes.text()]);
       if(runText!==freshText) changed=true;
     }catch(e){ offline=true; }
-  }));
+  })]);
   delete btn.dataset.checking;
   btn.disabled=false;
   if(changed){
@@ -617,12 +656,20 @@ function showUpdateToast(){
 renderHome();
 
 /* ── Family/private content: silent upgrade if a passphrase is already saved ── */
-familyAutoUnlock().then(ok=>{
-  if(ok){
-    state.familyUnlocked=true;
-    if(!state.gameId) renderHome(); // only re-paint if still on the home screen
-  }
-});
+/* family.js already merged any saved offline copy before the first render;
+   this refreshes it from the server in the background. Guarded: a cached
+   older family.js may lack familyRefresh (SW serves it stale-while-revalidate). */
+function onFamilyRefreshQuiet(s){ // label/state only; caller handles the toast
+  if(s==='merged'||s==='same'||s==='changed') state.familyUnlocked=true;
+}
+window.onFamilyRefresh=onFamilyRefresh; // family.js calls this on app resume
+if(typeof familyRefresh==='function'){
+  familyRefresh().then(onFamilyRefresh).catch(()=>{});
+}else if(typeof familyAutoUnlock==='function'){
+  familyAutoUnlock().then(ok=>{
+    if(ok){ state.familyUnlocked=true; if(!state.gameId) renderHome(); }
+  }).catch(()=>{});
+}
 </script>
 </body>
 </html>

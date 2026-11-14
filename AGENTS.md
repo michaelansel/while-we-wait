@@ -150,21 +150,53 @@ touches this repo's git history, even behind a password. Design writeup:
   new server process, no OAuth, no session store. One shared passphrase for
   the whole family (not per-person).
 - Client-side, `family.js` (loaded after `games.js`, before the engine):
-  - On load, silently checks `localStorage` for a saved passphrase. If
-    present, fetches `/while-we-wait-family/games.js` with a manually-attached
-    `Authorization: Basic` header and merges `PRIVATE_GAMES` into the
-    page's `GAMES` array, then the engine re-renders the home screen.
-  - Exposes a "🔒 Unlock family games" button (home screen footer) that
-    prompts for the passphrase once, and only saves it to `localStorage`
-    on a successful fetch.
-  - **Fails silently** on the auto-unlock path (401, offline, malformed
-    content) — the public app is always the correct fallback, never an
-    error state. The manual "unlock" button *does* show an alert on
-    failure (wrong passphrase feedback), since that path is user-initiated.
-  - `/while-we-wait-family/` is intentionally outside the service worker's `/while-we-wait/`
-    scope, so the SW's cache-first logic never sees (or caches) an
-    authenticated fetch or a 401. Private content is **not** offline-capable
-    in v1 — every unlock re-fetches over the network.
+  - **Keeps an offline copy.** The last good `PRIVATE_GAMES` source text is
+    saved in `localStorage` (`wwFamilyGames` = `{text, savedAt}`, next to the
+    passphrase in `wwFamilyPass`; `wwFamilyChecked` = last time the server
+    confirmed it). At load it merges the saved copy *synchronously*, so
+    family decks are on the first paint with or without signal.
+  - **Rule: only the user deletes the saved copy** (the lock button,
+    `familyLock()`). No server response, network error or bad deploy can
+    remove it. Worst case on the road is a slightly old copy.
+  - **Refreshes in the background** (`familyRefresh()`) on every load, when
+    the app comes back to the foreground after 30+ min (iOS home-screen apps
+    resume rather than reload), and from the "Check for updates" button.
+    15 s timeout. Results: `none | same | changed | merged | stale-pass | error`.
+    - New content is validated before it's saved: must eval to a non-empty
+      array of games, each with a string `id` that doesn't collide with a
+      public game and a non-empty `cards`. HTML responses (captive portals)
+      are rejected. A bad deploy never replaces a good copy.
+    - Changed content is saved and the normal update toast shows; it's used
+      on the next reload (never hot-swapped mid-game).
+    - **401** → passphrase was changed on the server. The copy is kept and the
+      button reads "re-enter passphrase". 403/5xx/offline → silent, copy kept.
+  - Home-screen button shows "🔓 Family games · saved for offline <date>",
+    the date the server last confirmed this device's copy — the at-a-glance
+    "is this device ready for a trip" signal.
+  - The manual "🔒 Unlock family games" prompt saves passphrase + content only
+    on a successful fetch, and alerts if the offline copy couldn't be saved.
+  - The engine guards every call (`typeof familyRefresh`, `familyState?.`)
+    because the SW can serve a newer `index.html` with an older cached
+    `family.js` or vice versa; old function contracts (`familyAutoUnlock` →
+    boolean, `familyUnlockPrompt` → boolean) are kept for the same reason.
+  - **`sw.js` must not touch `/while-we-wait-family/`.** A controlled page's
+    fetch events fire for *every* URL it requests, not just ones under the SW
+    scope. Before 2026-11-13 the SW cached the authenticated private file
+    (Cache Storage matching ignores `Authorization`) and kept serving it,
+    even after a lock. The fetch handler now returns early for any URL
+    outside `self.registration.scope`; keep it that way.
+  - Storage notes: `localStorage` is ~5 MB per *origin*, shared with every
+    other app on `whale-cobra.exe.xyz` (they can also read these keys).
+    Private `games.js` was ~176 KB in Nov 2026; move the copy to IndexedDB if
+    it nears ~1 MB. Cache Storage is not an option: `sw.js` `activate` deletes
+    every cache but the current one.
+  - **iOS:** a home-screen app has its own storage, separate from Safari —
+    unlock *inside the installed app*. Safari tabs (not installed apps) lose
+    script storage after 7 days without a visit. The device asks for
+    persistent storage (`navigator.storage.persist()`) when installed.
+  - Readiness check for a device before a trip: open the installed app online
+    twice (the second load picks up a new `family.js`), unlock, airplane mode,
+    force-quit, reopen, see the decks and "saved for offline".
 
 ### Adding real private content
 
@@ -201,4 +233,5 @@ and re-run the enforcement script, or the next timer tick reverts it.
   — there's no invite-link system. Changing it means updating
   `/home/exedev/httpd.conf` on the box (`busybox httpd -m <newpass>` for the
   hash) and telling family the new one; existing `localStorage` entries on
-  their devices will then silently fail the auto-unlock until they re-enter it.
+  their devices keep their saved copy and show "re-enter passphrase" until
+  they do (they stop receiving updates meanwhile).
