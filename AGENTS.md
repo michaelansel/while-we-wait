@@ -119,12 +119,14 @@ Every card's emoji (`e`, `a[0]`/`b[0]`) or OpenMoji `art` must show what the car
 - Testing gotcha: a reused browser profile serves the *previous* build from the service worker (you'll see the "New version available" toast). Use a fresh profile or private window.
 
 ### Incremental update from Kirstie's requests
-Kirstie asks for games in the brain (brain-mcp), in the project folder `projects/wait-games-requests/`. Her working note is `wishlist.md`; if a `requests.md` appears there, read that too. Work in small steps; pushing early is fine, because the set gets revised as she reviews it.
+Kirstie asks for games in the brain (brain-mcp), in the project folder `projects/wait-games-requests/`. Her working note is `requests.md`. Work in small steps; pushing early is fine, because the set gets revised as she reviews it.
 1. **Read** the folder's notes and pick out the open items: ticked games she hasn't seen built yet, changed tags, and anything she added in her own words.
 2. **Dedup against the pool first.** The pool is the public `games.js` *and* the private repo's `games.js` (`michaelansel/while-we-wait-private`). Search both for the game's idea, not only its name. Fortunately/Unfortunately, for example, is a card in the private `road-trip` deck *and* in public Story Builders. When something already exists, extend that deck or point to it instead of adding a copy. Family-specific content (names, our own games) goes private.
 3. **Build** it in the right repo, with tags per "Tags and filters" and art per the card art rule.
 4. **Check off** each item in her note with the commit hash (e.g. `@side-done 2026-11-17: built in f139622`) and add a dated line under its **Changes** heading. Edit only what you built; she owns the rest of the note.
 5. Deploy only with Michael's go (see Deploying).
+
+Whenever the private pool changes, refresh `projects/wait-games-requests/family-pool.md` in the brain: one line per private deck, giving its id, name, emoji, who/seated/energy and card count. Family originals also get a one-line description and 2 sample prompts. Purchased Playful Heart decks get name and count only, with no card text. Kirstie's Claude can't read the private repo, so this note is its only view of it.
 
 ### Changing app UI/behavior
 Edit `index.html`. The engine code starts at the `/* ENGINE */` comment.
